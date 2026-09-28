@@ -81,26 +81,42 @@ export default function Dashboard({ activeCategory, categories, searchQuery, onS
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-5">
-            {mockTips.map(tip => (
-              <div
-                key={tip.id}
-                className="bg-white rounded-2xl border border-gray-200 p-6 flex items-start gap-4 hover:shadow-lg hover:border-blue-300 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
-              >
+            {mockTips.map(tip => {
+              const hasVideo = Boolean(tip.video_url?.trim())
+              return (
                 <div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0 shadow-sm"
-                  style={{ backgroundColor: tip.color }}
+                  key={tip.id}
+                  onClick={() => {
+                    if (hasVideo) {
+                      window.open(tip.video_url, '_blank', 'noopener,noreferrer')
+                    }
+                  }}
+                  className={`bg-white rounded-2xl border border-gray-200 p-6 flex items-start gap-4 transition-all duration-200 ${
+                    hasVideo
+                      ? 'hover:shadow-lg hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer'
+                      : 'hover:border-gray-300'
+                  }`}
                 >
-                  {tip.abbr}
+                  <div
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0 shadow-sm"
+                    style={{ backgroundColor: tip.color }}
+                  >
+                    {tip.abbr}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-bold text-base text-gray-900 mb-1">{tip.title}</div>
+                    <div className="text-sm text-gray-600 leading-relaxed">{tip.desc}</div>
+                    {hasVideo && (
+                      <div className="mt-2.5">
+                        <span className="inline-flex items-center text-xs font-semibold text-red-600 hover:text-red-700 gap-1">
+                          ▶ Xem video hướng dẫn →
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-bold text-base text-gray-900 mb-1">{tip.title}</div>
-                  <div className="text-sm text-gray-600 mb-2">{tip.desc}</div>
-                  <span className="inline-flex items-center text-xs font-semibold text-blue-600 hover:text-blue-800">
-                    Sử dụng tiện ích →
-                  </span>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       ) : (
