@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Plus, Pencil, Trash2, X, AlertCircle, Link, FileText, Eye } from 'lucide-react'
-import { getFiles, createFile, updateFile, deleteFile, getSubjects } from '../../lib/api'
+import { getFiles, createFile, updateFile, deleteFile, getSubjects, uploadFileToStorage, getCategories, createSubject } from '../../lib/api'
 import { getTypeMeta, formatDate } from '../../lib/utils'
+import { PDFDocument } from 'pdf-lib'
+import { v4 as uuidv4 } from 'uuid'
 
 const INITIAL_FORM = {
   subject_id: '',
@@ -23,6 +25,18 @@ export default function FilesPanel() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [filterSubj, setFilterSubj] = useState('')
+  const [uploadFileObj, setUploadFileObj] = useState(null)
+  
+  // Bulk import state
+  const [showBulk, setShowBulk] = useState(false)
+  const [bulkSubjectId, setBulkSubjectId] = useState('')
+  const [bulkStatus, setBulkStatus] = useState('')
+  const [bulkProgress, setBulkProgress] = useState(0)
+  const [bulkTotal, setBulkTotal] = useState(0)
+  const folderInputRef = useRef(null)
+  
+  // Bulk delete state
+  const [selectedIds, setSelectedIds] = useState([])
 
   const load = async (subjectId) => {
     setLoading(true)
@@ -55,6 +69,7 @@ export default function FilesPanel() {
 
   useEffect(() => {
     load(filterSubj || null)
+    setSelectedIds([]) // clear selection when filter changes
   }, [filterSubj])
 
   const resetForm = () => {
@@ -62,6 +77,7 @@ export default function FilesPanel() {
     setEditingId(null)
     setShowForm(false)
     setError('')
+    setUploadFileObj(null)
   }
 
   const startAdd = () => {
@@ -84,32 +100,177 @@ export default function FilesPanel() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.name.trim() || !form.subject_id || !form.preview_url.trim()) {
-      setError('Vui lòng điền đầy đủ: tên tệp, môn học, và đường dẫn preview.')
+    if (!form.name.trim() || !form.subject_id) {
+      setError('Vui lòng điền đầy đủ: tên tệp, môn học.')
       return
     }
+    if (!editingId && !uploadFileObj && !form.preview_url) {
+      setError('Vui lòng chọn file tải lên hoặc nhập link preview.')
+      return
+    }
+    
     setSaving(true)
     setError('')
-    const payload = {
-      ...form,
-      subject_id: Number(form.subject_id),
+    
+    try {
+      let finalPreviewUrl = form.preview_url
+      
+      if (uploadFileObj) {
+        let finalFileToUpload = uploadFileObj
+        
+        // Nếu là PDF thì tự động cắt lấy 5% trang đầu
+        if (uploadFileObj.type === 'application/pdf') {
+          const arrayBuffer = await uploadFileObj.arrayBuffer()
+          const pdfDoc = await PDFDocument.load(arrayBuffer)
+          const pageCount = pdfDoc.getPageCount()
+          const pagesToKeep = Math.max(1, Math.ceil(pageCount * 0.05)) // Cắt 5%
+          
+          const previewPdf = await PDFDocument.create()
+          const copiedPages = await previewPdf.copyPages(pdfDoc, Array.from({length: pagesToKeep}, (_, i) => i))
+          copiedPages.forEach(page => previewPdf.addPage(page))
+          
+          const previewBytes = await previewPdf.save()
+          const previewBlob = new Blob([previewBytes], { type: 'application/pdf' })
+          finalFileToUpload = new File([previewBlob], `preview_${uploadFileObj.name}`, { type: 'application/pdf' })
+        }
+        
+        // Loại bỏ dấu tiếng Việt và ký tự đặc biệt để Supabase không báo lỗi Invalid key
+        const safeName = finalFileToUpload.name
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "") // Bỏ dấu
+          .replace(/đ/g, "d").replace(/Đ/g, "D") // Đổi đ thành d
+          .replace(/[^a-zA-Z0-9.\-_]/g, "_") // Đổi ký tự lạ thành _
+          
+        const path = `previews/${uuidv4()}_${safeName}`
+        finalPreviewUrl = await uploadFileToStorage(finalFileToUpload, path)
+      }
+
+      const payload = {
+        ...form,
+        subject_id: Number(form.subject_id),
+        preview_url: finalPreviewUrl,
+      }
+      
+      const fn = editingId ? updateFile(editingId, payload) : createFile(payload)
+      const { error: err } = await fn
+      
+      if (err) throw err
+      
+      await load(filterSubj || null)
+      resetForm()
+    } catch (err) {
+      setError(err.message || 'Có lỗi xảy ra khi tải lên.')
+    } finally {
+      setSaving(false)
     }
-    const fn = editingId ? updateFile(editingId, payload) : createFile(payload)
-    const { error: err } = await fn
-    if (err) { setError(err.message); setSaving(false); return }
-    await load(filterSubj || null)
-    resetForm()
-    setSaving(false)
   }
 
   const handleDelete = async (id) => {
     if (!confirm('Xóa tệp này?')) return
     const { error: err } = await deleteFile(id)
     if (err) setError(err.message)
-    else await load(filterSubj || null)
+    else {
+      setSelectedIds(prev => prev.filter(x => x !== id))
+      await load(filterSubj || null)
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Bạn có chắc chắn muốn xóa ${selectedIds.length} tệp đã chọn?`)) return
+    
+    let errCount = 0
+    for (const id of selectedIds) {
+      const { error: err } = await deleteFile(id)
+      if (err) errCount++
+    }
+    
+    if (errCount > 0) setError(`Có lỗi khi xóa ${errCount} tệp.`)
+    setSelectedIds([])
+    await load(filterSubj || null)
+  }
+
+  const toggleSelectAll = () => {
+    if (files.length === 0) return
+    if (selectedIds.length === files.length) {
+      setSelectedIds([])
+    } else {
+      setSelectedIds(files.map(f => f.id))
+    }
+  }
+
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
   }
 
   const getSubjectName = (id) => subjects.find(s => s.id === id)?.name || '—'
+
+  // --- Bulk Import Logic ---
+  const handleBulkFolderSelect = async (e) => {
+    const filesArray = Array.from(e.target.files)
+    if (!filesArray.length) return
+    if (!bulkSubjectId) {
+      alert('Vui lòng chọn môn học trước khi tải lên thư mục!')
+      return
+    }
+
+    // Filter documents - CHỈ CHẤP NHẬN FILE PDF
+    const docFiles = filesArray.filter(f => f.name.match(/\.(pdf)$/i))
+    if (!docFiles.length) {
+      alert('Không tìm thấy tài liệu PDF nào trong thư mục này. Các loại file khác đã bị tự động bỏ qua.')
+      return
+    }
+
+    setBulkTotal(docFiles.length)
+    setBulkProgress(0)
+    setBulkStatus('Đang xử lý...')
+
+    let successCount = 0
+
+    for (let i = 0; i < docFiles.length; i++) {
+      const file = docFiles[i]
+      setBulkStatus(`Đang xử lý file ${i+1}/${docFiles.length}: ${file.name}`)
+
+      try {
+        // Process file
+        let finalFileToUpload = file
+        if (file.type === 'application/pdf') {
+          const arrayBuffer = await file.arrayBuffer()
+          const pdfDoc = await PDFDocument.load(arrayBuffer)
+          const pageCount = pdfDoc.getPageCount()
+          const pagesToKeep = Math.max(1, Math.ceil(pageCount * 0.05))
+          const previewPdf = await PDFDocument.create()
+          const copiedPages = await previewPdf.copyPages(pdfDoc, Array.from({length: pagesToKeep}, (_, i) => i))
+          copiedPages.forEach(p => previewPdf.addPage(p))
+          const previewBytes = await previewPdf.save()
+          finalFileToUpload = new File([previewBytes], `preview_${file.name}`, { type: 'application/pdf' })
+        }
+
+        const safeName = finalFileToUpload.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D").replace(/[^a-zA-Z0-9.\-_]/g, "_")
+        const storagePath = `previews/${uuidv4()}_${safeName}`
+        const previewUrl = await uploadFileToStorage(finalFileToUpload, storagePath)
+
+        // Determine extension for type
+        const extMatch = file.name.match(/\.([a-z]+)$/i)
+        const type = extMatch ? extMatch[1].toLowerCase() : 'pdf'
+
+        await createFile({
+          subject_id: Number(bulkSubjectId),
+          name: file.name,
+          type: type,
+          size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+          preview_url: previewUrl
+        })
+        
+        successCount++
+      } catch (err) {
+        console.error("Lỗi file", file.name, err)
+      }
+      setBulkProgress(i + 1)
+    }
+
+    setBulkStatus(`Hoàn tất! Đã tải lên thành công ${successCount}/${docFiles.length} file.`)
+    await load(filterSubj || null)
+  }
 
   return (
     <div className="space-y-6">
@@ -118,10 +279,73 @@ export default function FilesPanel() {
           <h2 className="text-lg font-bold text-gray-900">Quản lý Tài liệu</h2>
           <p className="text-sm text-gray-500 mt-0.5">Thêm link Google Drive preview hoặc thông tin tệp vào môn học</p>
         </div>
-        <button onClick={startAdd} className="btn-primary">
-          <Plus size={16} /> Thêm tài liệu
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => setShowBulk(!showBulk)} className="btn-secondary">
+            📁 Tải lên cả thư mục
+          </button>
+          <button onClick={startAdd} className="btn-primary">
+            <Plus size={16} /> Thêm tài liệu
+          </button>
+        </div>
       </div>
+
+      {/* Bulk Import UI */}
+      {showBulk && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h3 className="font-bold text-blue-900">Tải lên hàng loạt từ thư mục</h3>
+              <p className="text-xs text-blue-700 mt-1 max-w-xl">
+                Tất cả các tài liệu (PDF, DOC...) trong thư mục bạn chọn sẽ được tải lên và gắn vào Môn học bạn chọn ở dưới đây. Các file PDF sẽ tự động được cắt 5%.
+              </p>
+            </div>
+            <button onClick={() => setShowBulk(false)}><X size={18} className="text-blue-500"/></button>
+          </div>
+          
+          <div className="flex items-center gap-3 mb-4">
+            <select
+              value={bulkSubjectId}
+              onChange={e => setBulkSubjectId(e.target.value)}
+              className="input-field bg-white max-w-xs"
+            >
+              <option value="">-- Chọn Môn học để thêm tài liệu --</option>
+              {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+            
+            <button 
+              onClick={() => folderInputRef.current?.click()}
+              className="btn-primary bg-blue-600 hover:bg-blue-700"
+              disabled={!bulkSubjectId}
+            >
+              Chọn thư mục máy tính
+            </button>
+            <input 
+              type="file" 
+              ref={folderInputRef}
+              webkitdirectory="" 
+              directory="" 
+              multiple 
+              className="hidden"
+              onChange={handleBulkFolderSelect}
+            />
+          </div>
+
+          {bulkTotal > 0 && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-semibold text-blue-800">
+                <span>{bulkStatus}</span>
+                <span>{bulkProgress} / {bulkTotal}</span>
+              </div>
+              <div className="w-full bg-blue-200 rounded-full h-2.5">
+                <div 
+                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
+                  style={{ width: `${(bulkProgress / bulkTotal) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {error && (
         <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-lg">
@@ -191,15 +415,25 @@ export default function FilesPanel() {
             </div>
             <div className="md:col-span-2">
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">
-                Link Google Drive Preview *
+                Tải lên tệp (Tự động cắt 5% nếu là PDF)
               </label>
               <input
-                value={form.preview_url}
-                onChange={e => setForm(f => ({ ...f, preview_url: e.target.value }))}
-                placeholder="https://drive.google.com/file/d/FILE_ID/preview"
-                className="input-field font-mono text-xs"
-                required
+                type="file"
+                onChange={e => {
+                  const file = e.target.files[0]
+                  if (file) {
+                    setUploadFileObj(file)
+                    if (!form.name) {
+                      setForm(f => ({ ...f, name: file.name, size: (file.size / 1024 / 1024).toFixed(2) + ' MB' }))
+                    }
+                  }
+                }}
+                className="input-field py-1.5"
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
               />
+              <div className="mt-2 text-xs text-gray-400">
+                Hoặc giữ nguyên link Google Drive hiện tại (nếu đang sửa tệp)
+              </div>
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">Kích thước (tùy chọn)</label>
@@ -254,6 +488,15 @@ export default function FilesPanel() {
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        {selectedIds.length > 0 && (
+          <div className="bg-blue-50 px-4 py-2 border-b border-blue-100 flex items-center justify-between">
+            <span className="text-sm text-blue-800 font-medium">Đã chọn {selectedIds.length} tệp</span>
+            <button onClick={handleBulkDelete} className="btn-danger !py-1.5 text-xs flex items-center gap-1.5">
+              <Trash2 size={14} /> Xóa {selectedIds.length} tệp
+            </button>
+          </div>
+        )}
+        
         {loading ? (
           <div className="p-8 text-center text-gray-400 text-sm">Đang tải...</div>
         ) : files.length === 0 ? (
@@ -262,6 +505,14 @@ export default function FilesPanel() {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
+                <th className="table-th w-10 text-center">
+                  <input 
+                    type="checkbox" 
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    checked={files.length > 0 && selectedIds.length === files.length} 
+                    onChange={toggleSelectAll} 
+                  />
+                </th>
                 <th className="table-th">Tên tài liệu</th>
                 <th className="table-th hidden md:table-cell">Môn học</th>
                 <th className="table-th hidden sm:table-cell">Loại</th>
@@ -274,7 +525,15 @@ export default function FilesPanel() {
               {files.map(file => {
                 const meta = getTypeMeta(file.type)
                 return (
-                  <tr key={file.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={file.id} className={`hover:bg-gray-50 transition-colors ${selectedIds.includes(file.id) ? 'bg-blue-50/50' : ''}`}>
+                    <td className="table-td text-center">
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        checked={selectedIds.includes(file.id)} 
+                        onChange={() => toggleSelect(file.id)} 
+                      />
+                    </td>
                     <td className="table-td">
                       <div className="flex items-center gap-2">
                         <FileText size={15} className={meta.text} />

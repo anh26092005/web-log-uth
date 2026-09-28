@@ -12,16 +12,16 @@ const SORTS = [
 
 function TipCard({ tip }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-3 hover:shadow-md hover:border-blue-200 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
+    <div className="bg-white rounded-2xl border border-gray-200 p-4 flex items-center gap-3.5 hover:shadow-lg hover:border-blue-300 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
       <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+        className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-base flex-shrink-0 shadow-sm"
         style={{ backgroundColor: tip.color }}
       >
         {tip.abbr}
       </div>
       <div className="min-w-0">
-        <div className="font-semibold text-sm text-gray-800 truncate">{tip.title}</div>
-        <div className="text-[11px] text-gray-500 truncate">{tip.desc}</div>
+        <div className="font-bold text-sm text-gray-900 truncate">{tip.title}</div>
+        <div className="text-xs text-gray-500 truncate mt-0.5">{tip.desc}</div>
       </div>
     </div>
   )
@@ -68,54 +68,52 @@ export default function Dashboard({ activeCategory, categories, searchQuery, onS
     <div className="flex-1 overflow-y-auto bg-gray-50">
       {/* Top hero */}
       {!isSearching && !activeCategory && (
-        <div className="bg-white border-b border-gray-100 px-6 py-5">
-          <div className="flex items-center gap-2 text-sm text-blue-600 mb-2">
-            <span className="text-gray-500">Kho tri thức chính quy</span>
-            <ChevronRight size={14} />
-            <span>Đại học Giao thông vận tải TP.HCM</span>
+        <div className="bg-white border-b border-gray-200 px-8 py-6 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
+            <span>🏛️ Đại học Giao thông vận tải TP Hồ Chí Minh</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-gray-950 mb-2 tracking-tight">
             Tài liệu học tập UTH — Logistics & CNTT
           </h1>
-          <p className="text-sm text-gray-500 max-w-2xl">
+          <p className="text-sm md:text-base text-gray-600 max-w-3xl leading-relaxed">
             Tổng hợp bài giảng, đề thi mẫu, đề cương chi tiết và tài liệu đồ án chuyên ngành được biên soạn bởi
             giảng viên và ban cán sự học tập.
           </p>
         </div>
       )}
 
-      <div className="px-6 py-5 space-y-8">
+      <div className="px-8 py-7 space-y-8">
         {/* Subject Grid */}
         <section>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
             <div>
-              <h2 className="flex items-center gap-2 text-base font-bold text-gray-900">
+              <h2 className="flex items-center gap-2 text-lg font-bold text-gray-950">
                 {isSearching ? (
                   <>
-                    <Star size={16} className="text-yellow-500" />
-                    Kết quả tìm kiếm "{searchQuery}"
+                    <Star size={18} className="text-amber-500 fill-amber-400" />
+                    <span>Kết quả tìm kiếm "{searchQuery}"</span>
                   </>
                 ) : (
                   <>
-                    <Star size={16} className="text-yellow-500" />
-                    {categoryName ? `Môn học — ${categoryName}` : 'MÔN HỌC NỔI BẬT'}
+                    <Star size={18} className="text-amber-500 fill-amber-400" />
+                    <span>{categoryName ? `Môn học — ${categoryName}` : 'MÔN HỌC NỔI BẬT'}</span>
                   </>
                 )}
               </h2>
               {!isSearching && (
-                <p className="text-xs text-gray-400 mt-0.5">
-                  Đang hiển thị {subjects.length} môn học phổ biến
+                <p className="text-sm text-gray-500 mt-0.5">
+                  Đang hiển thị {subjects.length} môn học
                 </p>
               )}
             </div>
 
-            <div className="flex items-center gap-2">
-              <SortAsc size={14} className="text-gray-400" />
-              <span className="text-xs text-gray-500">Sắp xếp theo:</span>
+            <div className="flex items-center gap-2 bg-white border border-gray-300 rounded-xl px-3 py-1.5 shadow-sm self-start sm:self-auto">
+              <SortAsc size={16} className="text-gray-500" />
+              <span className="text-xs font-medium text-gray-500">Sắp xếp:</span>
               <select
                 value={sort}
                 onChange={e => setSort(e.target.value)}
-                className="text-xs text-gray-700 bg-white border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+                className="text-xs font-semibold text-gray-800 bg-transparent focus:outline-none cursor-pointer"
               >
                 {SORTS.map(s => (
                   <option key={s.key} value={s.key}>{s.label}</option>
@@ -125,26 +123,26 @@ export default function Dashboard({ activeCategory, categories, searchQuery, onS
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="bg-white rounded-xl border border-gray-100 p-4 animate-pulse">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl border border-gray-200 p-5 animate-pulse min-h-[180px]">
                   <div className="flex gap-2 mb-3">
-                    <div className="h-5 w-10 bg-gray-100 rounded" />
-                    <div className="h-5 w-14 bg-gray-100 rounded" />
+                    <div className="h-5 w-12 bg-gray-200 rounded" />
+                    <div className="h-5 w-16 bg-gray-200 rounded" />
                   </div>
-                  <div className="h-4 bg-gray-100 rounded mb-2 w-3/4" />
-                  <div className="h-3 bg-gray-50 rounded mb-1" />
-                  <div className="h-3 bg-gray-50 rounded w-2/3" />
+                  <div className="h-5 bg-gray-200 rounded mb-2 w-3/4" />
+                  <div className="h-4 bg-gray-100 rounded mb-2" />
+                  <div className="h-4 bg-gray-100 rounded w-2/3" />
                 </div>
               ))}
             </div>
           ) : sortedSubjects.length === 0 ? (
-            <div className="text-center py-16 text-gray-400">
-              <Star size={40} className="mx-auto mb-3 text-gray-300" />
-              <p className="text-sm">Không tìm thấy môn học nào</p>
+            <div className="text-center py-16 text-gray-500 bg-white rounded-2xl border border-gray-200">
+              <Star size={44} className="mx-auto mb-3 text-gray-300" />
+              <p className="text-base font-semibold text-gray-700">Không tìm thấy môn học nào</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {sortedSubjects.map(subject => (
                 <SubjectCard key={subject.id} subject={subject} onClick={onSubjectClick} />
               ))}
@@ -156,15 +154,12 @@ export default function Dashboard({ activeCategory, categories, searchQuery, onS
         {!isSearching && (
           <section>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="flex items-center gap-2 text-base font-bold text-gray-900">
-                <span>⚡</span>
+              <h2 className="flex items-center gap-2 text-lg font-bold text-gray-950">
+                <span className="text-xl">⚡</span>
                 GÓC THỦ THUẬT & TIỆN ÍCH SINH VIÊN
               </h2>
-              <button className="text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors">
-                Xem tất cả 12 công cụ →
-              </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {mockTips.map(tip => <TipCard key={tip.id} tip={tip} />)}
             </div>
           </section>

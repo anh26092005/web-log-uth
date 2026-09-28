@@ -9,53 +9,56 @@ export default function SubjectCard({ subject, onClick }) {
 
   return (
     <div
-      className="subject-card group flex flex-col"
+      className="group flex flex-col bg-white rounded-2xl border border-gray-200 p-5 hover:border-blue-400 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer min-h-[180px] justify-between"
       onClick={() => onClick(subject)}
       role="button"
       tabIndex={0}
       onKeyDown={e => e.key === 'Enter' && onClick(subject)}
     >
-      {/* Top row: type badge + tag */}
-      <div className="flex items-center justify-between mb-3">
-        <span className={`tag-badge ${typeMeta.bg} ${typeMeta.text}`}>
-          {typeMeta.label}
-        </span>
-        {tag && (
-          <span className={`tag-badge ${tagMeta.bg} ${tagMeta.text}`}>
-            {tag}
+      <div>
+        {/* Top row: type badge + tag */}
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold ${typeMeta.bg} ${typeMeta.text}`}>
+            {typeMeta.label}
           </span>
+          {tag && (
+            <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold ${tagMeta.bg} ${tagMeta.text}`}>
+              {tag}
+            </span>
+          )}
+        </div>
+
+        {/* Title */}
+        <h3 className="font-bold text-gray-950 text-base leading-snug mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+          {subject.name}
+        </h3>
+
+        {/* Description */}
+        {subject.description && (
+          <p className="text-sm text-gray-600 leading-relaxed line-clamp-3 mb-4">
+            {subject.description}
+          </p>
         )}
       </div>
 
-      {/* Title */}
-      <h3 className="font-semibold text-gray-900 text-sm leading-snug mb-1.5 group-hover:text-blue-700 transition-colors line-clamp-2">
-        {subject.name}
-      </h3>
-
-      {/* Description */}
-      {subject.description && (
-        <p className="text-[12px] text-gray-500 leading-relaxed line-clamp-3 flex-1 mb-3">
-          {subject.description}
-        </p>
-      )}
-
       {/* Footer stats */}
-      <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
-        <div className="flex items-center gap-1 text-[11px] text-gray-400">
-          <Eye size={12} />
-          <span>{formatViews(subject.views)} xem</span>
+      <div className="pt-4 border-t border-gray-100 flex items-center justify-between mt-auto">
+        <div className="flex items-center gap-3 text-xs font-medium text-gray-600">
+          <span className="flex items-center gap-1.5">
+            <Eye size={14} className="text-gray-400" />
+            <span>{formatViews(subject.views)} xem</span>
+          </span>
+          {subject.file_count > 0 && (
+            <span className="flex items-center gap-1.5">
+              <Files size={14} className="text-gray-400" />
+              <span>{subject.file_count} tệp</span>
+            </span>
+          )}
         </div>
-        <button className="text-[11px] text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 transition-colors">
+        <span className="text-xs font-semibold text-blue-700 bg-blue-50 group-hover:bg-blue-600 group-hover:text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
           Xem thư mục →
-        </button>
+        </span>
       </div>
-
-      {subject.file_count > 0 && (
-        <div className="flex items-center gap-1 text-[11px] text-gray-400 mt-1.5">
-          <Files size={12} />
-          <span>{subject.file_count} tệp</span>
-        </div>
-      )}
     </div>
   )
 }

@@ -121,3 +121,17 @@ export async function deleteFile(id) {
   }
   return supabase.from('files').delete().eq('id', id)
 }
+
+export async function uploadFileToStorage(file, path) {
+  if (!isSupabaseConfigured()) {
+    throw new Error('Cần cấu hình kết nối Supabase thật để upload file.')
+  }
+  const { error } = await supabase.storage.from('documents').upload(path, file, {
+    cacheControl: '3600',
+    upsert: false,
+    contentType: file.type || 'application/pdf'
+  })
+  if (error) throw error
+  const { data: publicUrlData } = supabase.storage.from('documents').getPublicUrl(path)
+  return publicUrlData.publicUrl
+}

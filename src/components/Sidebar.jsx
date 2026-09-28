@@ -13,35 +13,26 @@ function CategoryIcon({ name }) {
 
 export default function Sidebar({ categories, activeCategory, onCategoryChange, subjectCounts }) {
   return (
-    <aside className="w-56 flex-shrink-0 h-full bg-white border-r border-gray-100 flex flex-col overflow-y-auto">
-      {/* Logo */}
-      <div className="px-4 pt-5 pb-4 border-b border-gray-100">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-sm">
-            U
-          </div>
-          <div>
-            <div className="font-bold text-gray-900 text-sm leading-tight">UTH Learning</div>
-            <div className="text-[10px] text-gray-400 leading-tight">Materials v2.4</div>
-          </div>
-        </div>
-      </div>
-
+    <aside className="w-72 flex-shrink-0 h-full bg-white border-r border-gray-200 flex flex-col overflow-y-auto">
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        <p className="px-3 text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">
+      <nav className="flex-1 px-4 py-6 space-y-1.5">
+        <p className="px-3 text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
           Danh mục chuyên ngành
         </p>
 
         {/* All subjects */}
         <button
           onClick={() => onCategoryChange(null)}
-          className={`sidebar-link w-full text-left ${activeCategory === null ? 'active' : ''}`}
+          className={`w-full text-left flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
+            activeCategory === null
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-950'
+          }`}
         >
-          <LayoutGrid size={16} />
+          <LayoutGrid size={18} />
           <span className="flex-1">Tất cả môn học</span>
-          <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-full ${
-            activeCategory === null ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'
+          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+            activeCategory === null ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-700'
           }`}>
             {subjectCounts?.total || 0}
           </span>
@@ -54,13 +45,17 @@ export default function Sidebar({ categories, activeCategory, onCategoryChange, 
             <button
               key={cat.id}
               onClick={() => onCategoryChange(cat.id)}
-              className={`sidebar-link w-full text-left ${isActive ? 'active' : ''}`}
+              className={`w-full text-left flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                isActive
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-950'
+              }`}
             >
               <CategoryIcon name={cat.icon} />
-              <span className="flex-1 truncate">{cat.name}</span>
+              <span className="flex-1 leading-snug">{cat.name}</span>
               {count > 0 && (
-                <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-full ${
-                  isActive ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'
+                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                  isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-700'
                 }`}>
                   {count}
                 </span>
@@ -69,19 +64,6 @@ export default function Sidebar({ categories, activeCategory, onCategoryChange, 
           )
         })}
       </nav>
-
-      {/* Bottom notice */}
-      <div className="px-3 py-4 border-t border-gray-100">
-        <div className="bg-green-50 rounded-lg px-3 py-2.5">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            <span className="text-xs font-semibold text-green-700">Hệ thống dữ liệu học kỳ 2</span>
-          </div>
-          <p className="text-[11px] text-green-600 leading-snug">
-            Cập nhật ngân hàng đề thi & slide tuần 12. Mọi thắc mắc liên hệ ban học tập.
-          </p>
-        </div>
-      </div>
     </aside>
   )
 }

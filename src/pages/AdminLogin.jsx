@@ -88,9 +88,7 @@ export default function AdminLogin() {
               ) : 'Đăng nhập'}
             </button>
 
-            <p className="text-center text-[11px] text-gray-400">
-              Mật khẩu mặc định: <code className="bg-gray-100 px-1.5 py-0.5 rounded font-mono text-gray-600">admin123</code>
-            </p>
+
           </form>
         </div>
       </div>

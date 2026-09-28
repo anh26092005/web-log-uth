@@ -8,7 +8,7 @@ export function AuthProvider({ children }) {
   })
 
   const login = (password) => {
-    const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123'
+    const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || '26092005@'
     if (password === adminPassword) {
       sessionStorage.setItem('admin_auth', 'true')
       setIsAuthenticated(true)
