@@ -76,7 +76,7 @@ export default function Dashboard({ activeCategory, categories, searchQuery, onS
             Tài liệu học tập UTH — Logistics & CNTT
           </h1>
           <p className="text-sm md:text-base text-gray-600 max-w-3xl leading-relaxed">
-            Tổng hợp bài giảng, đề thi mẫu, đề cương chi tiết và tài liệu đồ án chuyên ngành.
+            Tổng hợp bài giảng, đề thi mẫu, đề cương chi tiết và tài liệu đồ án chuyên ngành. (Lưu ý: Phiên bản xem trước này chỉ chứa một phần tài liệu).
           </p>
         </div>
       )}

@@ -6,7 +6,7 @@ const DAI_CUONG_ZALO_LINK = 'https://zalo.me/0898307785'
 
 export default function DocumentViewer({ file, subject, onClose }) {
   if (!file) return null
-  
+
   // Xác định link Zalo dựa theo danh mục môn học
   let currentZaloLink = DEFAULT_ZALO_LINK
   if (subject && subject.categories && subject.categories.name === 'Cơ sở & Đại cương') {
@@ -75,7 +75,7 @@ export default function DocumentViewer({ file, subject, onClose }) {
           </h3>
 
           <p className="text-gray-600 text-sm leading-relaxed mb-6 text-center">
-            Đây là bản xem thử (15% nội dung). Tài liệu được biên soạn kĩ càng nên có phát sinh phí vui lòng liên hệ admin.
+            Đây là bản xem thử (15% nội dung). Tài liệu được biên soạn kĩ càng nên có phát sinh phí vui lòng liên hệ.
           </p>
 
           <div className="bg-gray-50 rounded-xl p-4 mb-8 text-left border border-gray-100">
