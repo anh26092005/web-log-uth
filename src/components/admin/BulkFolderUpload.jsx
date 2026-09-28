@@ -129,17 +129,17 @@ export default function BulkFolderUpload({ categories, subjects, onComplete, onC
 
         // Process files in this subject
         for (const file of fileList) {
-          setStatusText(`[Môn ${sIdx + 1}/${entries.length}: ${subjName}] Đang cắt 5% & tải lên: ${file.name}`)
+          setStatusText(`[Môn ${sIdx + 1}/${entries.length}: ${subjName}] Đang cắt 15% & tải lên: ${file.name}`)
 
           try {
             let finalFileToUpload = file
 
-            // Slice PDF to 5% preview
+            // Slice PDF to 15% preview
             if (file.type === 'application/pdf') {
               const arrayBuffer = await file.arrayBuffer()
               const pdfDoc = await PDFDocument.load(arrayBuffer)
               const pageCount = pdfDoc.getPageCount()
-              const pagesToKeep = Math.max(1, Math.ceil(pageCount * 0.05))
+              const pagesToKeep = Math.max(1, Math.ceil(pageCount * 0.15))
 
               const previewPdf = await PDFDocument.create()
               const copiedPages = await previewPdf.copyPages(pdfDoc, Array.from({ length: pagesToKeep }, (_, i) => i))
@@ -204,7 +204,7 @@ export default function BulkFolderUpload({ categories, subjects, onComplete, onC
             <h3 className="text-base font-bold text-gray-900">Tải lên hàng loạt từ Thư mục máy tính</h3>
           </div>
           <p className="text-xs text-gray-600 mt-1 max-w-2xl leading-relaxed">
-            Hỗ trợ chọn thư mục lớn chứa nhiều thư mục con. Hệ thống sẽ tự động lấy tên mỗi thư mục con làm tên môn học, tự tạo môn học mới và tải các file PDF (đã tự động cắt 5% trang đầu) vào đúng môn.
+            Hỗ trợ chọn thư mục lớn chứa nhiều thư mục con. Hệ thống sẽ tự động lấy tên mỗi thư mục con làm tên môn học, tự tạo môn học mới và tải các file PDF (đã tự động cắt 15% trang đầu) vào đúng môn.
           </p>
         </div>
         {onClose && !isUploading && (
@@ -382,7 +382,7 @@ export default function BulkFolderUpload({ categories, subjects, onComplete, onC
           <div className="flex-1">
             <h4 className="font-bold text-emerald-900 text-sm">Tải lên hoàn tất thành công!</h4>
             <p className="text-xs text-emerald-700 mt-1 leading-relaxed">
-              Đã xử lý <strong>{completeSummary.subjectsCount} môn học</strong> (tạo mới {completeSummary.createdSubjectsCount} môn), tải lên và cắt 5% thành công <strong>{completeSummary.successFiles}/{completeSummary.totalFiles} file PDF</strong>.
+              Đã xử lý <strong>{completeSummary.subjectsCount} môn học</strong> (tạo mới {completeSummary.createdSubjectsCount} môn), tải lên và cắt 15% thành công <strong>{completeSummary.successFiles}/{completeSummary.totalFiles} file PDF</strong>.
             </p>
             <div className="mt-3 flex gap-2">
               <button

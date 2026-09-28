@@ -121,12 +121,12 @@ export default function FilesPanel() {
       if (uploadFileObj) {
         let finalFileToUpload = uploadFileObj
         
-        // Nếu là PDF thì tự động cắt lấy 5% trang đầu
+        // Nếu là PDF thì tự động cắt lấy 15% trang đầu
         if (uploadFileObj.type === 'application/pdf') {
           const arrayBuffer = await uploadFileObj.arrayBuffer()
           const pdfDoc = await PDFDocument.load(arrayBuffer)
           const pageCount = pdfDoc.getPageCount()
-          const pagesToKeep = Math.max(1, Math.ceil(pageCount * 0.05)) // Cắt 5%
+          const pagesToKeep = Math.max(1, Math.ceil(pageCount * 0.15)) // Cắt 15%
           
           const previewPdf = await PDFDocument.create()
           const copiedPages = await previewPdf.copyPages(pdfDoc, Array.from({length: pagesToKeep}, (_, i) => i))
@@ -305,7 +305,7 @@ export default function FilesPanel() {
             </div>
             <div className="md:col-span-2">
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">
-                Tải lên tệp (Tự động cắt 5% nếu là PDF)
+                Tải lên tệp (Tự động cắt 15% nếu là PDF)
               </label>
               <input
                 type="file"

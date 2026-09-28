@@ -60,7 +60,7 @@ export default function DocumentViewer({ file, subject, onClose }) {
           {/* Preview label */}
           <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-xs font-bold text-gray-700 px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-            Bản xem thử (5%)
+            Bản xem thử (15%)
           </div>
         </div>
 
@@ -75,7 +75,7 @@ export default function DocumentViewer({ file, subject, onClose }) {
           </h3>
 
           <p className="text-gray-600 text-sm leading-relaxed mb-6 text-center">
-            Đây là bản xem thử (5% nội dung). Tài liệu được biên soạn kĩ càng nên có phát sinh phí vui lòng liên hệ admin.
+            Đây là bản xem thử (15% nội dung). Tài liệu được biên soạn kĩ càng nên có phát sinh phí vui lòng liên hệ admin.
           </p>
 
           <div className="bg-gray-50 rounded-xl p-4 mb-8 text-left border border-gray-100">
