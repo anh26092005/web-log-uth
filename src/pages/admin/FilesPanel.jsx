@@ -4,6 +4,7 @@ import { getFiles, createFile, updateFile, deleteFile, getSubjects, uploadFileTo
 import { getTypeMeta, formatDate } from '../../lib/utils'
 import { PDFDocument } from 'pdf-lib'
 import { v4 as uuidv4 } from 'uuid'
+import BulkFolderUpload from '../../components/admin/BulkFolderUpload'
 
 const INITIAL_FORM = {
   subject_id: '',
@@ -18,6 +19,7 @@ const TYPE_OPTIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']
 export default function FilesPanel() {
   const [files, setFiles] = useState([])
   const [subjects, setSubjects] = useState([])
+  const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState(INITIAL_FORM)
   const [editingId, setEditingId] = useState(null)
@@ -29,11 +31,6 @@ export default function FilesPanel() {
   
   // Bulk import state
   const [showBulk, setShowBulk] = useState(false)
-  const [bulkSubjectId, setBulkSubjectId] = useState('')
-  const [bulkStatus, setBulkStatus] = useState('')
-  const [bulkProgress, setBulkProgress] = useState(0)
-  const [bulkTotal, setBulkTotal] = useState(0)
-  const folderInputRef = useRef(null)
   
   // Bulk delete state
   const [selectedIds, setSelectedIds] = useState([])
@@ -62,7 +59,13 @@ export default function FilesPanel() {
     if (data) setSubjects(data)
   }
 
+  const loadCategories = async () => {
+    const { data } = await getCategories()
+    if (data) setCategories(data)
+  }
+
   useEffect(() => {
+    loadCategories()
     loadSubjects()
     load(null)
   }, [])
@@ -204,74 +207,6 @@ export default function FilesPanel() {
 
   const getSubjectName = (id) => subjects.find(s => s.id === id)?.name || '—'
 
-  // --- Bulk Import Logic ---
-  const handleBulkFolderSelect = async (e) => {
-    const filesArray = Array.from(e.target.files)
-    if (!filesArray.length) return
-    if (!bulkSubjectId) {
-      alert('Vui lòng chọn môn học trước khi tải lên thư mục!')
-      return
-    }
-
-    // Filter documents - CHỈ CHẤP NHẬN FILE PDF
-    const docFiles = filesArray.filter(f => f.name.match(/\.(pdf)$/i))
-    if (!docFiles.length) {
-      alert('Không tìm thấy tài liệu PDF nào trong thư mục này. Các loại file khác đã bị tự động bỏ qua.')
-      return
-    }
-
-    setBulkTotal(docFiles.length)
-    setBulkProgress(0)
-    setBulkStatus('Đang xử lý...')
-
-    let successCount = 0
-
-    for (let i = 0; i < docFiles.length; i++) {
-      const file = docFiles[i]
-      setBulkStatus(`Đang xử lý file ${i+1}/${docFiles.length}: ${file.name}`)
-
-      try {
-        // Process file
-        let finalFileToUpload = file
-        if (file.type === 'application/pdf') {
-          const arrayBuffer = await file.arrayBuffer()
-          const pdfDoc = await PDFDocument.load(arrayBuffer)
-          const pageCount = pdfDoc.getPageCount()
-          const pagesToKeep = Math.max(1, Math.ceil(pageCount * 0.05))
-          const previewPdf = await PDFDocument.create()
-          const copiedPages = await previewPdf.copyPages(pdfDoc, Array.from({length: pagesToKeep}, (_, i) => i))
-          copiedPages.forEach(p => previewPdf.addPage(p))
-          const previewBytes = await previewPdf.save()
-          finalFileToUpload = new File([previewBytes], `preview_${file.name}`, { type: 'application/pdf' })
-        }
-
-        const safeName = finalFileToUpload.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D").replace(/[^a-zA-Z0-9.\-_]/g, "_")
-        const storagePath = `previews/${uuidv4()}_${safeName}`
-        const previewUrl = await uploadFileToStorage(finalFileToUpload, storagePath)
-
-        // Determine extension for type
-        const extMatch = file.name.match(/\.([a-z]+)$/i)
-        const type = extMatch ? extMatch[1].toLowerCase() : 'pdf'
-
-        await createFile({
-          subject_id: Number(bulkSubjectId),
-          name: file.name,
-          type: type,
-          size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-          preview_url: previewUrl
-        })
-        
-        successCount++
-      } catch (err) {
-        console.error("Lỗi file", file.name, err)
-      }
-      setBulkProgress(i + 1)
-    }
-
-    setBulkStatus(`Hoàn tất! Đã tải lên thành công ${successCount}/${docFiles.length} file.`)
-    await load(filterSubj || null)
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -291,60 +226,15 @@ export default function FilesPanel() {
 
       {/* Bulk Import UI */}
       {showBulk && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h3 className="font-bold text-blue-900">Tải lên hàng loạt từ thư mục</h3>
-              <p className="text-xs text-blue-700 mt-1 max-w-xl">
-                Tất cả các tài liệu (PDF, DOC...) trong thư mục bạn chọn sẽ được tải lên và gắn vào Môn học bạn chọn ở dưới đây. Các file PDF sẽ tự động được cắt 5%.
-              </p>
-            </div>
-            <button onClick={() => setShowBulk(false)}><X size={18} className="text-blue-500"/></button>
-          </div>
-          
-          <div className="flex items-center gap-3 mb-4">
-            <select
-              value={bulkSubjectId}
-              onChange={e => setBulkSubjectId(e.target.value)}
-              className="input-field bg-white max-w-xs"
-            >
-              <option value="">-- Chọn Môn học để thêm tài liệu --</option>
-              {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-            
-            <button 
-              onClick={() => folderInputRef.current?.click()}
-              className="btn-primary bg-blue-600 hover:bg-blue-700"
-              disabled={!bulkSubjectId}
-            >
-              Chọn thư mục máy tính
-            </button>
-            <input 
-              type="file" 
-              ref={folderInputRef}
-              webkitdirectory="" 
-              directory="" 
-              multiple 
-              className="hidden"
-              onChange={handleBulkFolderSelect}
-            />
-          </div>
-
-          {bulkTotal > 0 && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold text-blue-800">
-                <span>{bulkStatus}</span>
-                <span>{bulkProgress} / {bulkTotal}</span>
-              </div>
-              <div className="w-full bg-blue-200 rounded-full h-2.5">
-                <div 
-                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
-                  style={{ width: `${(bulkProgress / bulkTotal) * 100}%` }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
+        <BulkFolderUpload
+          categories={categories}
+          subjects={subjects}
+          onComplete={async () => {
+            await loadSubjects()
+            await load(filterSubj || null)
+          }}
+          onClose={() => setShowBulk(false)}
+        />
       )}
 
       {error && (

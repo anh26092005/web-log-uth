@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import Sidebar from '../components/Sidebar'
-import Header from '../components/Header'
 import Dashboard from '../components/Dashboard'
 import FileExplorer from '../components/FileExplorer'
 import DocumentViewer from '../components/DocumentViewer'
@@ -77,8 +76,6 @@ export default function PublicPage() {
 
       {/* Main area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Header onSearch={handleSearch} />
-
         {selectedSubject ? (
           <FileExplorer
             subject={selectedSubject}

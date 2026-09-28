@@ -1,7 +1,7 @@
 import { supabase, isSupabaseConfigured } from './supabase'
 import {
   lsGetCategories, lsCreateCategory, lsUpdateCategory, lsDeleteCategory,
-  lsGetSubjects, lsCreateSubject, lsUpdateSubject, lsDeleteSubject,
+  lsGetSubjects, lsCreateSubject, lsUpdateSubject, lsDeleteSubject, lsDeleteSubjects,
   lsIncrementViews, lsSearchSubjects,
   lsGetFiles, lsCreateFile, lsUpdateFile, lsDeleteFile,
 } from './localStorage'
@@ -56,6 +56,9 @@ export async function createSubject(payload) {
   if (!isSupabaseConfigured()) {
     return { data: lsCreateSubject(payload), error: null }
   }
+  if (Array.isArray(payload)) {
+    return supabase.from('subjects').insert(payload).select()
+  }
   return supabase.from('subjects').insert(payload).select().single()
 }
 
@@ -71,7 +74,17 @@ export async function deleteSubject(id) {
     lsDeleteSubject(id)
     return { error: null }
   }
+  await supabase.from('files').delete().eq('subject_id', id)
   return supabase.from('subjects').delete().eq('id', id)
+}
+
+export async function deleteSubjects(ids) {
+  if (!isSupabaseConfigured()) {
+    lsDeleteSubjects(ids)
+    return { error: null }
+  }
+  await supabase.from('files').delete().in('subject_id', ids)
+  return supabase.from('subjects').delete().in('id', ids)
 }
 
 export async function incrementViews(id) {

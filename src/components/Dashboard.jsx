@@ -76,8 +76,7 @@ export default function Dashboard({ activeCategory, categories, searchQuery, onS
             Tài liệu học tập UTH — Logistics & CNTT
           </h1>
           <p className="text-sm md:text-base text-gray-600 max-w-3xl leading-relaxed">
-            Tổng hợp bài giảng, đề thi mẫu, đề cương chi tiết và tài liệu đồ án chuyên ngành được biên soạn bởi
-            giảng viên và ban cán sự học tập.
+            Tổng hợp bài giảng, đề thi mẫu, đề cương chi tiết và tài liệu đồ án chuyên ngành.
           </p>
         </div>
       )}
@@ -156,7 +155,7 @@ export default function Dashboard({ activeCategory, categories, searchQuery, onS
             <div className="flex items-center justify-between mb-4">
               <h2 className="flex items-center gap-2 text-lg font-bold text-gray-950">
                 <span className="text-xl">⚡</span>
-                GÓC THỦ THUẬT & TIỆN ÍCH SINH VIÊN
+                Vài thủ thuật cho học tập
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

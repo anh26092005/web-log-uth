@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Plus, Pencil, Trash2, X, AlertCircle, Eye, Files } from 'lucide-react'
-import { getSubjects, createSubject, updateSubject, deleteSubject, getCategories } from '../../lib/api'
+import { getSubjects, createSubject, updateSubject, deleteSubject, deleteSubjects, getCategories } from '../../lib/api'
 import { formatViews, getTagMeta } from '../../lib/utils'
+import BulkFolderUpload from '../../components/admin/BulkFolderUpload'
 
 const INITIAL_FORM = {
   name: '', category_id: '', description: '',
@@ -18,6 +19,8 @@ export default function SubjectsPanel() {
   const [form, setForm] = useState(INITIAL_FORM)
   const [editingId, setEditingId] = useState(null)
   const [showForm, setShowForm] = useState(false)
+  const [showBulkFolder, setShowBulkFolder] = useState(false)
+  const [selectedIds, setSelectedIds] = useState([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [filterCat, setFilterCat] = useState('')
@@ -60,22 +63,68 @@ export default function SubjectsPanel() {
     setShowForm(true)
   }
 
+  const subjectNames = form.name
+    .split('\n')
+    .map(n => n.trim())
+    .filter(Boolean)
+  const isMultiple = !editingId && subjectNames.length > 1
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!form.name.trim() || !form.category_id) {
       setError('Vui lòng điền tên môn học và chọn danh mục.')
       return
     }
+
+    const names = form.name
+      .split('\n')
+      .map(n => n.trim())
+      .filter(Boolean)
+
+    if (names.length === 0) {
+      setError('Vui lòng nhập ít nhất 1 tên môn học.')
+      return
+    }
+
     setSaving(true)
     setError('')
-    const payload = {
-      ...form,
-      category_id: Number(form.category_id),
-      tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
+    const catId = Number(form.category_id)
+    const parsedTags = form.tags.split(',').map(t => t.trim()).filter(Boolean)
+
+    if (editingId) {
+      const payload = {
+        name: names[0],
+        category_id: catId,
+        description: form.description?.trim() || '',
+        type_tag: form.type_tag || 'PDF',
+        tags: parsedTags,
+      }
+      const { error: err } = await updateSubject(editingId, payload)
+      if (err) { setError(err.message); setSaving(false); return }
+    } else {
+      if (names.length === 1) {
+        const payload = {
+          name: names[0],
+          category_id: catId,
+          description: form.description?.trim() || '',
+          type_tag: form.type_tag || 'PDF',
+          tags: parsedTags,
+        }
+        const { error: err } = await createSubject(payload)
+        if (err) { setError(err.message); setSaving(false); return }
+      } else {
+        const payloads = names.map(name => ({
+          name,
+          category_id: catId,
+          description: form.description?.trim() || '',
+          type_tag: form.type_tag || 'PDF',
+          tags: parsedTags,
+        }))
+        const { error: err } = await createSubject(payloads)
+        if (err) { setError(err.message); setSaving(false); return }
+      }
     }
-    const fn = editingId ? updateSubject(editingId, payload) : createSubject(payload)
-    const { error: err } = await fn
-    if (err) { setError(err.message); setSaving(false); return }
+
     await load()
     resetForm()
     setSaving(false)
@@ -85,12 +134,57 @@ export default function SubjectsPanel() {
     if (!confirm('Xóa môn học này? Các tệp liên quan cũng sẽ bị xóa.')) return
     const { error: err } = await deleteSubject(id)
     if (err) setError(err.message)
-    else await load()
+    else {
+      setSelectedIds(prev => prev.filter(x => x !== id))
+      await load()
+    }
+  }
+
+  const handleDeleteSelected = async () => {
+    if (selectedIds.length === 0) return
+    if (!confirm(`Bạn có chắc chắn muốn xóa ${selectedIds.length} môn học đã chọn? Các tệp liên quan cũng sẽ bị xóa vĩnh viễn.`)) return
+    
+    setLoading(true)
+    const { error: err } = await deleteSubjects(selectedIds)
+    if (err) setError(err.message)
+    setSelectedIds([])
+    await load()
+  }
+
+  const handleDeleteAll = async () => {
+    if (filtered.length === 0) return
+    const msg = filterCat
+      ? `Bạn có chắc chắn muốn xóa TẤT CẢ ${filtered.length} môn học trong danh mục này? Mọi tài liệu bên trong cũng sẽ bị xóa vĩnh viễn!`
+      : `⚠️ CẢNH BÁO NGUY HIỂM:\nBạn có chắc chắn muốn xóa TOÀN BỘ ${subjects.length} môn học trên hệ thống?\nMọi tài liệu bên trong các môn này cũng sẽ bị xóa vĩnh viễn!`
+    
+    if (!confirm(msg)) return
+    setLoading(true)
+    const { error: err } = await deleteSubjects(filtered.map(s => s.id))
+    if (err) setError(err.message)
+    setSelectedIds([])
+    await load()
+  }
+
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  }
+
+  const toggleSelectAll = () => {
+    if (filtered.length === 0) return
+    if (selectedIds.length === filtered.length) {
+      setSelectedIds([])
+    } else {
+      setSelectedIds(filtered.map(s => s.id))
+    }
   }
 
   const filtered = filterCat
     ? subjects.filter(s => String(s.category_id) === filterCat)
     : subjects
+
+  useEffect(() => {
+    setSelectedIds([])
+  }, [filterCat])
 
   return (
     <div className="space-y-6">
@@ -99,10 +193,27 @@ export default function SubjectsPanel() {
           <h2 className="text-lg font-bold text-gray-900">Quản lý Môn học</h2>
           <p className="text-sm text-gray-500 mt-0.5">Thêm, sửa, xóa môn học và gắn vào danh mục</p>
         </div>
-        <button onClick={startAdd} className="btn-primary">
-          <Plus size={16} /> Thêm môn học
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => setShowBulkFolder(!showBulkFolder)} className="btn-secondary">
+            📁 Tải lên thư mục nhiều môn
+          </button>
+          <button onClick={startAdd} className="btn-primary">
+            <Plus size={16} /> Thêm môn học
+          </button>
+        </div>
       </div>
+
+      {/* Bulk Multi-Folder Upload UI */}
+      {showBulkFolder && (
+        <BulkFolderUpload
+          categories={categories}
+          subjects={subjects}
+          onComplete={async () => {
+            await load()
+          }}
+          onClose={() => setShowBulkFolder(false)}
+        />
+      )}
 
       {error && (
         <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-lg">
@@ -125,14 +236,39 @@ export default function SubjectsPanel() {
           </div>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1.5">Tên môn học *</label>
-              <input
-                value={form.name}
-                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                placeholder="vd: Quản trị Chuỗi cung ứng"
-                className="input-field"
-                required
-              />
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-gray-700">
+                  {editingId ? 'Tên môn học *' : 'Tên môn học (1 dòng = 1 môn) *'}
+                </label>
+                {isMultiple && (
+                  <span className="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                    ⚡ {subjectNames.length} môn được thêm cùng lúc
+                  </span>
+                )}
+              </div>
+              {editingId ? (
+                <input
+                  value={form.name}
+                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                  placeholder="vd: Quản trị Chuỗi cung ứng"
+                  className="input-field"
+                  required
+                />
+              ) : (
+                <textarea
+                  value={form.name}
+                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                  placeholder={`Nhập hoặc dán danh sách môn học (mỗi dòng 1 môn):\nKinh tế vi mô\nKinh tế vĩ mô\nNguyên lý kế toán\nLogistics đại cương`}
+                  rows={4}
+                  className="input-field font-medium leading-relaxed resize-y"
+                  required
+                />
+              )}
+              {!editingId && (
+                <p className="text-[11px] text-gray-400 mt-1">
+                  💡 Nhấn Enter xuống dòng để nhập thêm môn khác hoặc dán nhiều môn từ Excel/Word.
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">Danh mục *</label>
@@ -154,7 +290,7 @@ export default function SubjectsPanel() {
                 value={form.description}
                 onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                 placeholder="Mô tả ngắn về nội dung môn học..."
-                rows={3}
+                rows={2}
                 className="input-field resize-none"
               />
             </div>
@@ -186,9 +322,15 @@ export default function SubjectsPanel() {
                 {saving ? (
                   <span className="flex items-center gap-2">
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Đang lưu...
+                    {isMultiple ? `Đang thêm ${subjectNames.length} môn...` : 'Đang lưu...'}
                   </span>
-                ) : editingId ? 'Lưu thay đổi' : 'Thêm môn học'}
+                ) : editingId ? (
+                  'Lưu thay đổi'
+                ) : isMultiple ? (
+                  `Thêm ${subjectNames.length} môn học`
+                ) : (
+                  'Thêm môn học'
+                )}
               </button>
               <button type="button" onClick={resetForm} className="btn-secondary">Hủy</button>
             </div>
@@ -196,21 +338,46 @@ export default function SubjectsPanel() {
         </div>
       )}
 
-      {/* Filter */}
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-gray-500">Lọc theo danh mục:</span>
-        <select
-          value={filterCat}
-          onChange={e => setFilterCat(e.target.value)}
-          className="input-field w-auto"
-        >
-          <option value="">Tất cả ({subjects.length})</option>
-          {categories.map(c => (
-            <option key={c.id} value={c.id}>
-              {c.name} ({subjects.filter(s => String(s.category_id) === String(c.id)).length})
-            </option>
-          ))}
-        </select>
+      {/* Filter & Bulk Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-gray-700">Lọc theo danh mục:</span>
+          <select
+            value={filterCat}
+            onChange={e => setFilterCat(e.target.value)}
+            className="input-field w-auto font-medium"
+          >
+            <option value="">Tất cả ({subjects.length})</option>
+            {categories.map(c => (
+              <option key={c.id} value={c.id}>
+                {c.name} ({subjects.filter(s => String(s.category_id) === String(c.id)).length})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Delete action buttons */}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          {selectedIds.length > 0 && (
+            <button
+              onClick={handleDeleteSelected}
+              className="btn-danger flex items-center gap-1.5 text-xs font-semibold py-2 px-3.5 shadow-sm"
+            >
+              <Trash2 size={14} />
+              <span>Xóa {selectedIds.length} môn đã chọn</span>
+            </button>
+          )}
+
+          {filtered.length > 0 && (
+            <button
+              onClick={handleDeleteAll}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-red-100 hover:bg-red-200 text-red-800 text-xs font-bold rounded-lg transition-colors border border-red-200 cursor-pointer shadow-sm"
+            >
+              <Trash2 size={14} />
+              <span>Xóa toàn bộ {filtered.length} môn học</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Table */}
@@ -223,6 +390,14 @@ export default function SubjectsPanel() {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
+                <th className="table-th w-10 text-center">
+                  <input
+                    type="checkbox"
+                    checked={filtered.length > 0 && selectedIds.length === filtered.length}
+                    onChange={toggleSelectAll}
+                    className="rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                </th>
                 <th className="table-th">Tên môn học</th>
                 <th className="table-th hidden md:table-cell">Danh mục</th>
                 <th className="table-th hidden lg:table-cell">Tags</th>
@@ -237,8 +412,17 @@ export default function SubjectsPanel() {
                 const tag = Array.isArray(subj.tags) ? subj.tags[0] : subj.tags
                 const tagMeta = getTagMeta(tag)
                 const catName = categories.find(c => c.id === subj.category_id)?.name || '—'
+                const isSelected = selectedIds.includes(subj.id)
                 return (
-                  <tr key={subj.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={subj.id} className={`hover:bg-gray-50 transition-colors ${isSelected ? 'bg-blue-50/40' : ''}`}>
+                    <td className="table-td w-10 text-center">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleSelect(subj.id)}
+                        className="rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                    </td>
                     <td className="table-td">
                       <div className="font-semibold text-gray-800">{subj.name}</div>
                       <div className="text-xs text-gray-400 line-clamp-1 mt-0.5">{subj.description}</div>

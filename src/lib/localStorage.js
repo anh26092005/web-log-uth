@@ -134,6 +134,16 @@ export function lsGetSubjects(categoryId = null) {
 }
 export function lsCreateSubject(payload) {
   const items = load(KEYS.subjects, SEED_SUBJECTS)
+  if (Array.isArray(payload)) {
+    let currentMaxId = items.length === 0 ? 0 : Math.max(...items.map(i => i.id))
+    const created = payload.map(p => {
+      currentMaxId += 1
+      return { id: currentMaxId, views: 0, file_count: 0, ...p }
+    })
+    items.push(...created)
+    save(KEYS.subjects, items)
+    return created
+  }
   const newItem = { id: nextId(items), views: 0, file_count: 0, ...payload }
   items.push(newItem)
   save(KEYS.subjects, items)
@@ -150,6 +160,13 @@ export function lsDeleteSubject(id) {
   save(KEYS.subjects, items)
   // Also delete related files
   const files = lsGetFiles().filter(f => f.subject_id !== id)
+  save(KEYS.files, files)
+}
+export function lsDeleteSubjects(ids) {
+  const idSet = new Set(ids.map(Number))
+  const items = load(KEYS.subjects, SEED_SUBJECTS).filter(i => !idSet.has(Number(i.id)))
+  save(KEYS.subjects, items)
+  const files = lsGetFiles().filter(f => !idSet.has(Number(f.subject_id)))
   save(KEYS.files, files)
 }
 export function lsIncrementViews(id) {
