@@ -55,11 +55,10 @@ export default function Dashboard({
       <div className="md:hidden bg-white border-b border-gray-200 px-3 py-2.5 overflow-x-auto flex-shrink-0 flex items-center gap-1.5 scrollbar-none">
         <button
           onClick={() => onCategoryChange && onCategoryChange(null)}
-          className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
-            activeCategory === null
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
+          className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${activeCategory === null
+            ? 'bg-blue-600 text-white shadow-xs'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
         >
           <LayoutGrid size={13} />
           <span>Tất cả</span>
@@ -75,11 +74,10 @@ export default function Dashboard({
             <button
               key={cat.id}
               onClick={() => onCategoryChange && onCategoryChange(cat.id)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
-                isActive
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${isActive
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
             >
               <span>{cat.name}</span>
               {count > 0 && (
@@ -93,11 +91,10 @@ export default function Dashboard({
 
         <button
           onClick={() => onCategoryChange && onCategoryChange('tips')}
-          className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 ${
-            activeCategory === 'tips'
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100'
-          }`}
+          className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 ${activeCategory === 'tips'
+            ? 'bg-blue-600 text-white shadow-xs'
+            : 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100'
+            }`}
         >
           <Zap size={13} className={activeCategory === 'tips' ? 'text-yellow-300' : 'text-amber-500'} />
           <span>⚡ Thủ thuật</span>
@@ -129,11 +126,10 @@ export default function Dashboard({
                       window.open(tip.video_url, '_blank', 'noopener,noreferrer')
                     }
                   }}
-                  className={`bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 flex items-start gap-3.5 sm:gap-4 transition-all duration-200 ${
-                    hasVideo
-                      ? 'hover:shadow-lg hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer'
-                      : 'hover:border-gray-300'
-                  }`}
+                  className={`bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 flex items-start gap-3.5 sm:gap-4 transition-all duration-200 ${hasVideo
+                    ? 'hover:shadow-lg hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer'
+                    : 'hover:border-gray-300'
+                    }`}
                 >
                   <div
                     className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-white font-bold text-base sm:text-lg flex-shrink-0 shadow-xs"
@@ -169,13 +165,13 @@ export default function Dashboard({
           {!activeCategory && (
             <div className="bg-white border-b border-gray-200 px-4 py-4 sm:px-8 sm:py-6 shadow-xs">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-700 rounded-full text-[11px] sm:text-xs font-bold uppercase tracking-wider mb-2">
-                <span>🏛️ ĐH Giao thông vận tải TP.HCM</span>
+                <span>🏛️ ĐH Giao thông vận tải TP.HCM</span >
               </div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-950 mb-1.5 tracking-tight">
                 Tài liệu học tập UTH — Logistics & CNTT
               </h1>
               <p className="text-xs sm:text-sm md:text-base text-gray-600 max-w-3xl leading-relaxed">
-                Tổng hợp bài giảng, đề thi mẫu, đề cương chi tiết và tài liệu đồ án chuyên ngành. (Lưu ý: Phiên bản xem trước này chỉ chứa một phần tài liệu).
+                Tổng hợp bài giảng, đề thi mẫu, đề cương chi tiết và tài liệu đồ án chuyên ngành. (Lưu ý:Tài liệu được biên soạn kĩ càng nên có phát sinh phí nếu có nhu cầu vui lòng liên hệ zalo.Phiên bản xem trước này chỉ chứa một phần tài liệu).
               </p>
             </div>
           )}
