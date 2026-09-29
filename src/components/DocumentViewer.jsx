@@ -37,21 +37,19 @@ export default function DocumentViewer({ file, subject, onClose }) {
         <div className="flex md:hidden items-center bg-gray-800 p-0.5 rounded-lg border border-gray-700 flex-shrink-0">
           <button
             onClick={() => setMobileTab('preview')}
-            className={`px-2 py-1 rounded text-[11px] font-semibold transition-all cursor-pointer ${
-              mobileTab === 'preview'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-400 hover:text-gray-200'
-            }`}
+            className={`px-2 py-1 rounded text-[11px] font-semibold transition-all cursor-pointer ${mobileTab === 'preview'
+              ? 'bg-blue-600 text-white'
+              : 'text-gray-400 hover:text-gray-200'
+              }`}
           >
             Xem thử
           </button>
           <button
             onClick={() => setMobileTab('paywall')}
-            className={`px-2 py-1 rounded text-[11px] font-semibold transition-all cursor-pointer ${
-              mobileTab === 'paywall'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-400 hover:text-gray-200'
-            }`}
+            className={`px-2 py-1 rounded text-[11px] font-semibold transition-all cursor-pointer ${mobileTab === 'paywall'
+              ? 'bg-blue-600 text-white'
+              : 'text-gray-400 hover:text-gray-200'
+              }`}
           >
             Mở khóa
           </button>
@@ -70,9 +68,8 @@ export default function DocumentViewer({ file, subject, onClose }) {
       <div className="flex-1 flex flex-col md:flex-row relative overflow-hidden bg-gray-100">
         {/* PDF Iframe (Full view on desktop, visible on mobile when mobileTab === 'preview') */}
         <div
-          className={`flex-1 relative w-full h-full ${
-            mobileTab === 'preview' ? 'flex flex-col' : 'hidden md:flex flex-col'
-          }`}
+          className={`flex-1 relative w-full h-full ${mobileTab === 'preview' ? 'flex flex-col' : 'hidden md:flex flex-col'
+            }`}
         >
           {file.preview_url ? (
             <iframe
@@ -119,9 +116,8 @@ export default function DocumentViewer({ file, subject, onClose }) {
 
         {/* Paywall Sidebar (Always visible on desktop, visible on mobile when mobileTab === 'paywall') */}
         <div
-          className={`w-full md:w-[380px] lg:w-[400px] bg-white border-t md:border-t-0 md:border-l border-gray-200 p-5 sm:p-8 flex flex-col justify-center flex-shrink-0 z-10 shadow-[-10px_0_20px_-10px_rgba(0,0,0,0.05)] overflow-y-auto ${
-            mobileTab === 'paywall' ? 'flex flex-1' : 'hidden md:flex'
-          }`}
+          className={`w-full md:w-[380px] lg:w-[400px] bg-white border-t md:border-t-0 md:border-l border-gray-200 p-5 sm:p-8 flex flex-col justify-center flex-shrink-0 z-10 shadow-[-10px_0_20px_-10px_rgba(0,0,0,0.05)] overflow-y-auto ${mobileTab === 'paywall' ? 'flex flex-1' : 'hidden md:flex'
+            }`}
         >
           <div className="w-14 h-14 sm:w-16 sm:h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-5 flex-shrink-0">
             <Lock size={26} className="text-blue-600" />
@@ -132,7 +128,7 @@ export default function DocumentViewer({ file, subject, onClose }) {
           </h3>
 
           <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-5 sm:mb-6 text-center">
-            Đây là bản xem thử (15% nội dung). Tài liệu được biên soạn kĩ càng nên có phát sinh phí vui lòng liên hệ.
+            Đây là bản xem thử (15% nội dung). Tài liệu được biên soạn kĩ càng nên có phát sinh phí nếu có nhu cầu vui lòng liên hệ.
           </p>
 
           <div className="bg-gray-50 rounded-xl p-3.5 sm:p-4 mb-6 sm:mb-8 text-left border border-gray-100">
@@ -157,7 +153,7 @@ export default function DocumentViewer({ file, subject, onClose }) {
             style={{ backgroundColor: '#0068FF' }}
           >
             <MessageCircle size={18} />
-            <span>Liên hệ Admin qua Zalo</span>
+            <span>Liên hệ qua Zalo</span>
           </a>
 
           <p className="text-[11px] text-gray-400 mt-4 sm:mt-5 text-center px-4">

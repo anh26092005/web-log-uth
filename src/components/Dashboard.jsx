@@ -144,10 +144,16 @@ export default function Dashboard({
                   <div className="flex-1 min-w-0">
                     <div className="font-bold text-sm sm:text-base text-gray-900 mb-1 leading-snug">{tip.title}</div>
                     <div className="text-xs sm:text-sm text-gray-600 leading-relaxed">{tip.desc}</div>
-                    {hasVideo && (
+                    {hasVideo ? (
                       <div className="mt-2.5">
                         <span className="inline-flex items-center text-xs font-semibold text-red-600 hover:text-red-700 gap-1">
                           ▶ Xem video hướng dẫn →
+                        </span>
+                      </div>
+                    ) : tip.is_developing && (
+                      <div className="mt-2.5">
+                        <span className="inline-flex items-center text-xs font-semibold text-orange-500 gap-1">
+                          ⏳ Video đang được phát triển
                         </span>
                       </div>
                     )}

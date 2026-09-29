@@ -115,10 +115,10 @@ export const mockFiles = [
 ]
 
 export const mockTips = [
-  { id: 1, abbr: 'SD', color: '#3B82F6', title: 'Bypass Studocu', desc: 'Tải tài liệu trên studocu nhanh gọn', video_url: '' },
-  { id: 2, abbr: 'SC', color: '#10B981', title: 'Tải Scribd Downloader', desc: 'tải xuống chỉ cần url', video_url: '' },
-  { id: 3, abbr: 'QZ', color: '#F59E0B', title: 'Cách tra cứu Quiz UTH siêu nhanh', desc: 'tra cứu quiz UTH với AI siêu nhanh', video_url: '' },
-  { id: 4, abbr: 'AI', color: '#8B5CF6', title: 'Deep Search Tiểu luận', desc: 'Gợi ý dàn bài chuẩn', video_url: '' },
+  { id: 1, abbr: 'SD', color: '#3B82F6', title: 'Bypass Studocu', desc: 'Tải tài liệu trên studocu nhanh gọn', video_url: 'https://youtu.be/xsIg29YZO2w' },
+  { id: 2, abbr: 'SC', color: '#10B981', title: 'Tải Scribd Downloader', desc: 'tải xuống chỉ cần url', video_url: 'https://youtu.be/t5ySZRajGQI' },
+  { id: 3, abbr: 'QZ', color: '#F59E0B', title: 'Cách tra cứu Quiz UTH siêu nhanh', desc: 'tra cứu quiz UTH với AI siêu nhanh', video_url: 'https://youtu.be/j24SzOY51AA' },
+  { id: 4, abbr: 'AI', color: '#8B5CF6', title: 'Deep Search Tiểu luận', desc: 'Gợi ý dàn bài chuẩn', video_url: '', is_developing: true },
 ]
 
  0987055081
