@@ -1,11 +1,24 @@
-import React, { useState } from 'react'
-import { X, MessageCircle, Lock, ArrowLeft, Info, FileText } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { X, MessageCircle, Lock, ArrowLeft, Download, ExternalLink, RefreshCw, Eye } from 'lucide-react'
 
 const DEFAULT_ZALO_LINK = import.meta.env.VITE_ZALO_LINK || 'https://zalo.me/0827526857'
 const DAI_CUONG_ZALO_LINK = 'https://zalo.me/0987055081'
 
 export default function DocumentViewer({ file, subject, onClose }) {
   const [mobileTab, setMobileTab] = useState('preview') // 'preview' or 'paywall'
+  const [isMobile, setIsMobile] = useState(false)
+  const [viewerMode, setViewerMode] = useState('google') // 'google' or 'direct'
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Phát hiện thiết bị di động
+    const checkMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent || navigator.vendor || window.opera
+    )
+    setIsMobile(checkMobile)
+    // Nếu là mobile, mặc định dùng Google Docs Viewer để tránh bị tự động tải file
+    setViewerMode(checkMobile ? 'google' : 'direct')
+  }, [])
 
   if (!file) return null
 
@@ -13,6 +26,26 @@ export default function DocumentViewer({ file, subject, onClose }) {
   let currentZaloLink = DEFAULT_ZALO_LINK
   if (subject && subject.categories && subject.categories.name === 'Cơ sở & Đại cương') {
     currentZaloLink = DAI_CUONG_ZALO_LINK
+  }
+
+  // Tạo URL iframe xem tài liệu
+  const getIframeSrc = () => {
+    if (!file.preview_url) return ''
+    if (viewerMode === 'google') {
+      return `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(file.preview_url)}`
+    }
+    return file.preview_url
+  }
+
+  const handleDownloadPreview = () => {
+    if (!file.preview_url) return
+    const link = document.createElement('a')
+    link.href = file.preview_url
+    link.target = '_blank'
+    link.download = `${file.name.replace(/\.[^/.]+$/, '')}_XemThu.pdf`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   return (
@@ -32,6 +65,18 @@ export default function DocumentViewer({ file, subject, onClose }) {
         <span className="text-xs sm:text-sm text-gray-300 truncate flex-1 min-w-0 font-medium">
           {file.name}
         </span>
+
+        {/* Nút tải bản xem thử */}
+        {file.preview_url && (
+          <button
+            onClick={handleDownloadPreview}
+            title="Tải bản xem thử PDF"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xs font-medium transition-colors border border-gray-700 flex-shrink-0 cursor-pointer"
+          >
+            <Download size={14} />
+            <span className="hidden sm:inline">Tải PDF xem thử</span>
+          </button>
+        )}
 
         {/* Mobile Tab Toggle (< md) */}
         <div className="flex md:hidden items-center bg-gray-800 p-0.5 rounded-lg border border-gray-700 flex-shrink-0">
@@ -72,11 +117,55 @@ export default function DocumentViewer({ file, subject, onClose }) {
             }`}
         >
           {file.preview_url ? (
-            <iframe
-              src={file.preview_url}
-              className="w-full flex-1 border-0 bg-gray-50"
-              title={file.name}
-            />
+            <div className="relative w-full flex-1 flex flex-col bg-gray-100">
+              {/* Thanh công cụ phụ trợ cho xem tài liệu */}
+              <div className="bg-gray-800/90 backdrop-blur-xs text-gray-300 px-3 py-1.5 flex items-center justify-between text-xs border-b border-gray-700/50">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                  <span className="font-medium text-gray-200">Bản xem thử (15% nội dung)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {/* Chuyển đổi chế độ xem nếu cần */}
+                  <button
+                    onClick={() => {
+                      setIsLoading(true)
+                      setViewerMode(viewerMode === 'google' ? 'direct' : 'google')
+                    }}
+                    className="text-[11px] text-gray-300 hover:text-white underline cursor-pointer"
+                    title="Đổi trình xem nếu không tải được"
+                  >
+                    {viewerMode === 'google' ? 'Xem trực tiếp' : 'Xem qua Google Docs'}
+                  </button>
+                  <a
+                    href={file.preview_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-[11px] text-blue-400 hover:text-blue-300 ml-1"
+                    title="Mở trong tab mới"
+                  >
+                    <ExternalLink size={12} />
+                    <span className="hidden sm:inline">Mở tab mới</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Loading indicator */}
+              {isLoading && (
+                <div className="absolute inset-0 top-8 flex flex-col items-center justify-center bg-gray-50 z-10">
+                  <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mb-3"></div>
+                  <p className="text-xs text-gray-500 font-medium">Đang tải bản xem thử...</p>
+                  <p className="text-[11px] text-gray-400 mt-1">Nếu tải lâu, bạn có thể bấm "Tải PDF xem thử" ở trên</p>
+                </div>
+              )}
+
+              <iframe
+                key={viewerMode + file.preview_url}
+                src={getIframeSrc()}
+                className="w-full flex-1 border-0 bg-white"
+                title={file.name}
+                onLoad={() => setIsLoading(false)}
+              />
+            </div>
           ) : (
             <div className="w-full flex-1 flex items-center justify-center bg-gray-50 p-6">
               <div className="text-center">
@@ -84,16 +173,10 @@ export default function DocumentViewer({ file, subject, onClose }) {
                   <Lock size={22} className="text-blue-600" />
                 </div>
                 <p className="text-sm text-gray-700 font-medium">{file.name}</p>
-                <p className="text-xs text-gray-400 mt-1">Bản xem trước</p>
+                <p className="text-xs text-gray-400 mt-1">Tài liệu chưa có bản xem trước trực tuyến</p>
               </div>
             </div>
           )}
-
-          {/* Preview label pill */}
-          <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-xs text-[11px] sm:text-xs font-bold text-gray-700 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-gray-200 shadow-sm flex items-center gap-2 pointer-events-none">
-            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-            <span>Bản xem thử (15%)</span>
-          </div>
 
           {/* Mobile Bottom Sticky Zalo CTA Bar (< md only) */}
           <div className="md:hidden bg-white/95 backdrop-blur-md border-t border-gray-200 px-3.5 py-2.5 flex items-center justify-between gap-3 shadow-lg flex-shrink-0">
@@ -164,7 +247,7 @@ export default function DocumentViewer({ file, subject, onClose }) {
           <div className="md:hidden mt-4 text-center">
             <button
               onClick={() => setMobileTab('preview')}
-              className="text-xs font-semibold text-blue-600 hover:underline"
+              className="text-xs font-semibold text-blue-600 hover:underline cursor-pointer"
             >
               ← Quay lại đọc bản xem thử
             </button>
