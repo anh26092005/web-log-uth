@@ -43,3 +43,60 @@ export function formatDate(dateStr) {
     return dateStr
   }
 }
+
+export const DEFAULT_ZALO_LINK = 'https://zalo.me/0827526857'
+export const DAI_CUONG_ZALO_LINK = 'https://zalo.me/0987055081'
+
+function normalizeStr(str) {
+  if (!str) return ''
+  return String(str)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/[^a-z0-9]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+export function getZaloLink(subjectOrCategory) {
+  if (!subjectOrCategory) return DEFAULT_ZALO_LINK
+
+  const targetNames = []
+
+  if (typeof subjectOrCategory === 'string') {
+    targetNames.push(subjectOrCategory)
+  } else if (typeof subjectOrCategory === 'object') {
+    if (subjectOrCategory.name) targetNames.push(subjectOrCategory.name)
+    if (subjectOrCategory.categories?.name) targetNames.push(subjectOrCategory.categories.name)
+    if (subjectOrCategory.category_name) targetNames.push(subjectOrCategory.category_name)
+    if (subjectOrCategory.slug) targetNames.push(subjectOrCategory.slug)
+
+    // Check category id directly if applicable
+    if (
+      subjectOrCategory.category_id === 4 ||
+      subjectOrCategory.category_id === '4' ||
+      subjectOrCategory.category_id === 'co-so' ||
+      subjectOrCategory.id === 4
+    ) {
+      return DAI_CUONG_ZALO_LINK
+    }
+  }
+
+  for (const name of targetNames) {
+    const norm = normalizeStr(name)
+    // Khớp các danh mục: "ĐẠI CƯƠNG&LOGISTICS", "Cơ sở & Đại cương", "Toán cao cấp", v.v.
+    if (
+      norm.includes('dai cuong') ||
+      norm.includes('co so va dai cuong') ||
+      norm.includes('co so dai cuong')
+    ) {
+      return DAI_CUONG_ZALO_LINK
+    }
+  }
+
+  return DEFAULT_ZALO_LINK
+}
+
+
+

@@ -120,5 +120,3 @@ export const mockTips = [
   { id: 3, abbr: 'QZ', color: '#F59E0B', title: 'Cách tra cứu Quiz UTH siêu nhanh', desc: 'tra cứu quiz UTH với AI siêu nhanh', video_url: 'https://youtu.be/j24SzOY51AA' },
   { id: 4, abbr: 'AI', color: '#8B5CF6', title: 'Deep Search Tiểu luận', desc: 'Gợi ý dàn bài chuẩn', video_url: '', is_developing: true },
 ]
-
- 0987055081

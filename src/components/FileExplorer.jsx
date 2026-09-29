@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { ArrowLeft, FileText, File, Sheet, Eye, ChevronRight, Folder } from 'lucide-react'
+import { ArrowLeft, FileText, File, Sheet, Eye, ChevronRight, Folder, MessageCircle } from 'lucide-react'
 import { getFiles } from '../lib/api'
-import { getTypeMeta, formatDate } from '../lib/utils'
+import { getTypeMeta, formatDate, getZaloLink } from '../lib/utils'
 
 const FILE_ICON_MAP = {
   pdf: FileText,
@@ -31,6 +31,8 @@ export default function FileExplorer({ subject, onBack, onFileClick }) {
 
   if (!subject) return null
 
+  const zaloLink = getZaloLink(subject)
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
       {/* Breadcrumb & Header */}
@@ -59,15 +61,53 @@ export default function FileExplorer({ subject, onBack, onFileClick }) {
             </h2>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="text-[11px] sm:text-xs font-bold text-gray-700 bg-gray-100 px-2.5 py-1 rounded-full whitespace-nowrap">
+            <a
+              href={zaloLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-[#0068FF] hover:bg-blue-700 px-3 py-1.5 sm:py-2 rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer"
+              title="Liên hệ qua Zalo để biết chi tiết"
+            >
+              <MessageCircle size={14} />
+              <span className="hidden sm:inline">Liên hệ qua Zalo để biết chi tiết</span>
+              <span className="sm:hidden">Zalo chi tiết</span>
+            </a>
+            <span className="text-[11px] sm:text-xs font-bold text-gray-700 bg-gray-100 px-2.5 py-1 sm:py-2 rounded-xl whitespace-nowrap">
               {files.length} tệp
             </span>
           </div>
         </div>
       </div>
 
+
       {/* File list */}
       <div className="flex-1 overflow-y-auto p-3 sm:p-6 md:p-8">
+        {/* Banner liên hệ Zalo */}
+        <div className="mb-4 sm:mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/80 rounded-2xl p-3.5 sm:p-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm shadow-blue-500/30">
+              <MessageCircle size={20} />
+            </div>
+            <div className="min-w-0">
+              <div className="text-xs sm:text-sm font-bold text-gray-900 leading-snug">
+                Bạn cần trọn bộ tài liệu hoặc hỗ trợ môn học này?
+              </div>
+              <div className="text-[11px] sm:text-xs text-gray-600 truncate mt-0.5">
+                Nhận full file tài liệu, bài tập, đề thi có đáp án chi tiết qua Zalo
+              </div>
+            </div>
+          </div>
+          <a
+            href={zaloLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-white bg-[#0068FF] hover:bg-blue-700 px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-sm active:scale-95 flex-shrink-0 cursor-pointer"
+          >
+            <MessageCircle size={15} />
+            <span>Liên hệ qua Zalo để biết chi tiết</span>
+          </a>
+        </div>
+
         {loading ? (
           <div className="flex items-center justify-center h-48 text-gray-500">
             <div className="animate-spin w-7 h-7 border-2 border-blue-600 border-t-transparent rounded-full mr-3" />
@@ -108,7 +148,17 @@ export default function FileExplorer({ subject, onBack, onFileClick }) {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-end pt-2 border-t border-gray-100">
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-100 gap-2">
+                      <a
+                        href={zaloLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-800"
+                      >
+                        <MessageCircle size={13} />
+                        <span>Liên hệ Zalo</span>
+                      </a>
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
@@ -168,13 +218,26 @@ export default function FileExplorer({ subject, onBack, onFileClick }) {
                             {formatDate(file.created_at)}
                           </td>
                           <td className="px-5 py-4 text-right">
-                            <button
-                              onClick={e => { e.stopPropagation(); onFileClick(file) }}
-                              className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 hover:text-white bg-blue-50 hover:bg-blue-600 px-3.5 py-2 rounded-xl transition-all shadow-xs cursor-pointer"
-                            >
-                              <Eye size={14} />
-                              <span>Xem ngay</span>
-                            </button>
+                            <div className="inline-flex items-center gap-2">
+                              <a
+                                href={zaloLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={e => e.stopPropagation()}
+                                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline px-2 py-1"
+                                title="Liên hệ qua Zalo để biết chi tiết"
+                              >
+                                <MessageCircle size={13} />
+                                <span className="hidden lg:inline">Liên hệ Zalo</span>
+                              </a>
+                              <button
+                                onClick={e => { e.stopPropagation(); onFileClick(file) }}
+                                className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 hover:text-white bg-blue-50 hover:bg-blue-600 px-3.5 py-2 rounded-xl transition-all shadow-xs cursor-pointer"
+                              >
+                                <Eye size={14} />
+                                <span>Xem ngay</span>
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       )

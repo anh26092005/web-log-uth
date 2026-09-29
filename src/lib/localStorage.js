@@ -125,10 +125,16 @@ export function lsDeleteCategory(id) {
 // ─── Subjects ─────────────────────────────────────────────────
 export function lsGetSubjects(categoryId = null) {
   const items = load(KEYS.subjects, SEED_SUBJECTS)
-  // Sync file_count from files
+  const categories = lsGetCategories()
+  const catMap = {}
+  categories.forEach(c => { catMap[c.id] = c })
+  // Sync file_count from files & categories info
   const files = lsGetFiles()
   items.forEach(s => {
     s.file_count = files.filter(f => f.subject_id === s.id).length
+    if (catMap[s.category_id]) {
+      s.categories = { name: catMap[s.category_id].name }
+    }
   })
   return categoryId ? items.filter(s => s.category_id === categoryId) : items
 }

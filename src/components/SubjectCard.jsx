@@ -1,11 +1,17 @@
 import React from 'react'
-import { Eye, Files } from 'lucide-react'
-import { getTypeMeta, getTagMeta, formatViews } from '../lib/utils'
+import { Eye, Files, MessageCircle } from 'lucide-react'
+import { getTypeMeta, getTagMeta, formatViews, getZaloLink } from '../lib/utils'
 
 export default function SubjectCard({ subject, onClick }) {
   const typeMeta = getTypeMeta(subject.type_tag)
   const tag = Array.isArray(subject.tags) ? subject.tags[0] : subject.tags
   const tagMeta = getTagMeta(tag)
+  const zaloLink = getZaloLink(subject)
+
+  const handleZaloClick = (e) => {
+    e.stopPropagation()
+    window.open(zaloLink, '_blank', 'noopener,noreferrer')
+  }
 
   return (
     <div
@@ -35,10 +41,23 @@ export default function SubjectCard({ subject, onClick }) {
 
         {/* Description */}
         {subject.description && (
-          <p className="text-xs sm:text-sm text-gray-600 leading-relaxed line-clamp-2 sm:line-clamp-3 mb-3 sm:mb-4">
+          <p className="text-xs sm:text-sm text-gray-600 leading-relaxed line-clamp-2 sm:line-clamp-3 mb-2.5 sm:mb-3">
             {subject.description}
           </p>
         )}
+
+        {/* Zalo Contact Action */}
+        <div className="mb-3">
+          <button
+            type="button"
+            onClick={handleZaloClick}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-blue-700 hover:text-blue-900 bg-blue-50/90 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200/70 transition-all cursor-pointer shadow-2xs active:scale-95 group/btn"
+            title="Liên hệ qua Zalo để biết chi tiết"
+          >
+            <MessageCircle size={14} className="text-blue-600 group-hover/btn:scale-110 transition-transform flex-shrink-0" />
+            <span className="truncate">Liên hệ qua Zalo để biết chi tiết</span>
+          </button>
+        </div>
       </div>
 
       {/* Footer stats */}
@@ -64,4 +83,5 @@ export default function SubjectCard({ subject, onClick }) {
     </div>
   )
 }
+
 

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { X, MessageCircle, Lock, ArrowLeft, Download, ExternalLink, RefreshCw, Eye } from 'lucide-react'
-
-const DEFAULT_ZALO_LINK = import.meta.env.VITE_ZALO_LINK || 'https://zalo.me/0827526857'
-const DAI_CUONG_ZALO_LINK = 'https://zalo.me/0987055081'
+import { getZaloLink } from '../lib/utils'
 
 export default function DocumentViewer({ file, subject, onClose }) {
   const [mobileTab, setMobileTab] = useState('preview') // 'preview' or 'paywall'
@@ -23,10 +21,8 @@ export default function DocumentViewer({ file, subject, onClose }) {
   if (!file) return null
 
   // Xác định link Zalo dựa theo danh mục môn học
-  let currentZaloLink = DEFAULT_ZALO_LINK
-  if (subject && subject.categories && subject.categories.name === 'Cơ sở & Đại cương') {
-    currentZaloLink = DAI_CUONG_ZALO_LINK
-  }
+  const currentZaloLink = getZaloLink(subject)
+
 
   // Tạo URL iframe xem tài liệu
   const getIframeSrc = () => {
@@ -236,7 +232,7 @@ export default function DocumentViewer({ file, subject, onClose }) {
             style={{ backgroundColor: '#0068FF' }}
           >
             <MessageCircle size={18} />
-            <span>Liên hệ qua Zalo</span>
+            <span>Liên hệ qua Zalo để biết chi tiết</span>
           </a>
 
           <p className="text-[11px] text-gray-400 mt-4 sm:mt-5 text-center px-4">
