@@ -93,7 +93,7 @@ export default function FileExplorer({ subject, onBack, onFileClick }) {
                 Bạn cần trọn bộ tài liệu hoặc hỗ trợ môn học này?
               </div>
               <div className="text-[11px] sm:text-xs text-gray-600 truncate mt-0.5">
-                Nhận full file tài liệu, bài tập, đề thi có đáp án chi tiết qua Zalo
+                Nhận full file tài liệu, bài tập, đề thi chi tiết qua Zalo
               </div>
             </div>
           </div>
