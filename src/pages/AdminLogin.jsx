@@ -35,15 +35,15 @@ export default function AdminLogin() {
       <div className="relative w-full max-w-sm">
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-8 text-white text-center">
-            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-              <Lock size={26} />
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-6 sm:px-8 sm:py-8 text-white text-center">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 backdrop-blur-sm">
+              <Lock size={24} />
             </div>
-            <h1 className="text-xl font-bold mb-1">Admin Panel</h1>
-            <p className="text-blue-200 text-sm">UTH Learning Materials</p>
+            <h1 className="text-lg sm:text-xl font-bold mb-1">Admin Panel</h1>
+            <p className="text-blue-200 text-xs sm:text-sm">UTH Learning Materials</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="px-8 py-7 space-y-5">
+          <form onSubmit={handleSubmit} className="px-5 py-6 sm:px-8 sm:py-7 space-y-4 sm:space-y-5">
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
                 Mật khẩu quản trị
@@ -61,7 +61,7 @@ export default function AdminLogin() {
                 <button
                   type="button"
                   onClick={() => setShow(!show)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
                 >
                   {show ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -69,8 +69,8 @@ export default function AdminLogin() {
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 px-3 py-2.5 rounded-lg">
-                <AlertCircle size={15} />
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-red-600 bg-red-50 px-3 py-2.5 rounded-lg">
+                <AlertCircle size={15} className="flex-shrink-0" />
                 <span>{error}</span>
               </div>
             )}
@@ -78,7 +78,7 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={loading || !password}
-              className="btn-primary w-full justify-center py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary w-full justify-center py-2.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {loading ? (
                 <span className="flex items-center gap-2">
@@ -88,7 +88,14 @@ export default function AdminLogin() {
               ) : 'Đăng nhập'}
             </button>
 
-
+            <div className="text-center pt-1">
+              <a
+                href="/"
+                className="text-xs font-medium text-gray-500 hover:text-blue-600 transition-colors inline-block"
+              >
+                ← Quay lại trang học tập
+              </a>
+            </div>
           </form>
         </div>
       </div>

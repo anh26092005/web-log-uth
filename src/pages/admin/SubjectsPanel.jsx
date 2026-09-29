@@ -187,18 +187,18 @@ export default function SubjectsPanel() {
   }, [filterCat])
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Quản lý Môn học</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Thêm, sửa, xóa môn học và gắn vào danh mục</p>
+          <h2 className="text-base sm:text-lg font-bold text-gray-900">Quản lý Môn học</h2>
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Thêm, sửa, xóa môn học và gắn vào danh mục</p>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => setShowBulkFolder(!showBulkFolder)} className="btn-secondary">
-            📁 Tải lên thư mục nhiều môn
+        <div className="flex flex-wrap items-center gap-2">
+          <button onClick={() => setShowBulkFolder(!showBulkFolder)} className="btn-secondary !text-xs !py-2">
+            📁 Thư mục nhiều môn
           </button>
-          <button onClick={startAdd} className="btn-primary">
-            <Plus size={16} /> Thêm môn học
+          <button onClick={startAdd} className="btn-primary !text-xs !py-2">
+            <Plus size={15} /> Thêm môn học
           </button>
         </div>
       </div>
@@ -216,25 +216,25 @@ export default function SubjectsPanel() {
       )}
 
       {error && (
-        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-lg">
-          <AlertCircle size={16} />
-          <span>{error}</span>
-          <button onClick={() => setError('')} className="ml-auto"><X size={14} /></button>
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-red-600 bg-red-50 border border-red-200 px-3.5 py-2.5 rounded-lg">
+          <AlertCircle size={16} className="flex-shrink-0" />
+          <span className="flex-1">{error}</span>
+          <button onClick={() => setError('')} className="p-1 cursor-pointer"><X size={14} /></button>
         </div>
       )}
 
       {/* Add/Edit Form */}
       {showForm && (
-        <div className="bg-white rounded-xl border border-blue-200 shadow-sm p-6">
-          <div className="flex items-center justify-between mb-5">
+        <div className="bg-white rounded-xl border border-blue-200 shadow-sm p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-5">
             <h3 className="text-sm font-bold text-gray-800">
               {editingId ? 'Chỉnh sửa môn học' : 'Thêm môn học mới'}
             </h3>
-            <button onClick={resetForm} className="text-gray-400 hover:text-gray-600 p-1 rounded">
+            <button onClick={resetForm} className="text-gray-400 hover:text-gray-600 p-1 rounded cursor-pointer">
               <X size={18} />
             </button>
           </div>
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-xs font-semibold text-gray-700">
@@ -317,7 +317,7 @@ export default function SubjectsPanel() {
                 {TAG_OPTIONS.map(t => <option key={t} value={t} />)}
               </datalist>
             </div>
-            <div className="md:col-span-2 flex gap-3 pt-2 border-t border-gray-100">
+            <div className="md:col-span-2 flex flex-wrap gap-2.5 pt-2 border-t border-gray-100">
               <button type="submit" disabled={saving} className="btn-primary">
                 {saving ? (
                   <span className="flex items-center gap-2">
@@ -340,12 +340,12 @@ export default function SubjectsPanel() {
 
       {/* Filter & Bulk Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-gray-700">Lọc theo danh mục:</span>
+        <div className="flex items-center gap-2.5">
+          <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">Lọc danh mục:</span>
           <select
             value={filterCat}
             onChange={e => setFilterCat(e.target.value)}
-            className="input-field w-auto font-medium"
+            className="input-field !py-1.5 !text-xs w-auto font-medium"
           >
             <option value="">Tất cả ({subjects.length})</option>
             {categories.map(c => (
@@ -357,13 +357,13 @@ export default function SubjectsPanel() {
         </div>
 
         {/* Delete action buttons */}
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex flex-wrap items-center gap-2">
           {selectedIds.length > 0 && (
             <button
               onClick={handleDeleteSelected}
-              className="btn-danger flex items-center gap-1.5 text-xs font-semibold py-2 px-3.5 shadow-sm"
+              className="btn-danger flex items-center gap-1.5 text-xs font-semibold py-1.5 px-3 shadow-xs"
             >
-              <Trash2 size={14} />
+              <Trash2 size={13} />
               <span>Xóa {selectedIds.length} môn đã chọn</span>
             </button>
           )}
@@ -371,102 +371,105 @@ export default function SubjectsPanel() {
           {filtered.length > 0 && (
             <button
               onClick={handleDeleteAll}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-red-100 hover:bg-red-200 text-red-800 text-xs font-bold rounded-lg transition-colors border border-red-200 cursor-pointer shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-800 text-xs font-bold rounded-lg transition-colors border border-red-200 cursor-pointer shadow-xs"
             >
-              <Trash2 size={14} />
-              <span>Xóa toàn bộ {filtered.length} môn học</span>
+              <Trash2 size={13} />
+              <span>Xóa toàn bộ ({filtered.length})</span>
             </button>
           )}
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xs">
         {loading ? (
           <div className="p-8 text-center text-gray-400 text-sm">Đang tải...</div>
         ) : filtered.length === 0 ? (
           <div className="p-8 text-center text-gray-400 text-sm">Chưa có môn học nào</div>
         ) : (
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="table-th w-10 text-center">
-                  <input
-                    type="checkbox"
-                    checked={filtered.length > 0 && selectedIds.length === filtered.length}
-                    onChange={toggleSelectAll}
-                    className="rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
-                  />
-                </th>
-                <th className="table-th">Tên môn học</th>
-                <th className="table-th hidden md:table-cell">Danh mục</th>
-                <th className="table-th hidden lg:table-cell">Tags</th>
-                <th className="table-th hidden sm:table-cell">Loại</th>
-                <th className="table-th hidden sm:table-cell">Lượt xem</th>
-                <th className="table-th hidden sm:table-cell">Tệp</th>
-                <th className="table-th text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {filtered.map(subj => {
-                const tag = Array.isArray(subj.tags) ? subj.tags[0] : subj.tags
-                const tagMeta = getTagMeta(tag)
-                const catName = categories.find(c => c.id === subj.category_id)?.name || '—'
-                const isSelected = selectedIds.includes(subj.id)
-                return (
-                  <tr key={subj.id} className={`hover:bg-gray-50 transition-colors ${isSelected ? 'bg-blue-50/40' : ''}`}>
-                    <td className="table-td w-10 text-center">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleSelect(subj.id)}
-                        className="rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
-                      />
-                    </td>
-                    <td className="table-td">
-                      <div className="font-semibold text-gray-800">{subj.name}</div>
-                      <div className="text-xs text-gray-400 line-clamp-1 mt-0.5">{subj.description}</div>
-                    </td>
-                    <td className="table-td hidden md:table-cell text-xs text-gray-500">{catName}</td>
-                    <td className="table-td hidden lg:table-cell">
-                      {tag && (
-                        <span className={`tag-badge ${tagMeta.bg} ${tagMeta.text}`}>{tag}</span>
-                      )}
-                    </td>
-                    <td className="table-td hidden sm:table-cell">
-                      <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                        {subj.type_tag || 'PDF'}
-                      </span>
-                    </td>
-                    <td className="table-td hidden sm:table-cell">
-                      <div className="flex items-center gap-1 text-xs text-gray-400">
-                        <Eye size={12} />
-                        {formatViews(subj.views)}
-                      </div>
-                    </td>
-                    <td className="table-td hidden sm:table-cell">
-                      <div className="flex items-center gap-1 text-xs text-gray-400">
-                        <Files size={12} />
-                        {subj.file_count || 0}
-                      </div>
-                    </td>
-                    <td className="table-td text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => startEdit(subj)} className="btn-secondary !py-1.5 !px-3 text-xs">
-                          <Pencil size={13} /> Sửa
-                        </button>
-                        <button onClick={() => handleDelete(subj.id)} className="btn-danger">
-                          <Trash2 size={13} /> Xóa
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-100">
+                <tr>
+                  <th className="table-th w-10 text-center">
+                    <input
+                      type="checkbox"
+                      checked={filtered.length > 0 && selectedIds.length === filtered.length}
+                      onChange={toggleSelectAll}
+                      className="rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                  </th>
+                  <th className="table-th whitespace-nowrap">Tên môn học</th>
+                  <th className="table-th hidden md:table-cell whitespace-nowrap">Danh mục</th>
+                  <th className="table-th hidden lg:table-cell whitespace-nowrap">Tags</th>
+                  <th className="table-th hidden sm:table-cell whitespace-nowrap">Loại</th>
+                  <th className="table-th hidden sm:table-cell whitespace-nowrap">Lượt xem</th>
+                  <th className="table-th hidden sm:table-cell whitespace-nowrap">Tệp</th>
+                  <th className="table-th text-right whitespace-nowrap">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {filtered.map(subj => {
+                  const tag = Array.isArray(subj.tags) ? subj.tags[0] : subj.tags
+                  const tagMeta = getTagMeta(tag)
+                  const catName = categories.find(c => c.id === subj.category_id)?.name || '—'
+                  const isSelected = selectedIds.includes(subj.id)
+                  return (
+                    <tr key={subj.id} className={`hover:bg-gray-50 transition-colors ${isSelected ? 'bg-blue-50/40' : ''}`}>
+                      <td className="table-td w-10 text-center">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleSelect(subj.id)}
+                          className="rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                        />
+                      </td>
+                      <td className="table-td">
+                        <div className="font-semibold text-gray-800 text-sm">{subj.name}</div>
+                        <div className="text-xs text-gray-400 line-clamp-1 mt-0.5">{subj.description}</div>
+                      </td>
+                      <td className="table-td hidden md:table-cell text-xs text-gray-500 whitespace-nowrap">{catName}</td>
+                      <td className="table-td hidden lg:table-cell">
+                        {tag && (
+                          <span className={`tag-badge ${tagMeta.bg} ${tagMeta.text}`}>{tag}</span>
+                        )}
+                      </td>
+                      <td className="table-td hidden sm:table-cell">
+                        <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                          {subj.type_tag || 'PDF'}
+                        </span>
+                      </td>
+                      <td className="table-td hidden sm:table-cell">
+                        <div className="flex items-center gap-1 text-xs text-gray-400">
+                          <Eye size={12} />
+                          {formatViews(subj.views)}
+                        </div>
+                      </td>
+                      <td className="table-td hidden sm:table-cell">
+                        <div className="flex items-center gap-1 text-xs text-gray-400">
+                          <Files size={12} />
+                          {subj.file_count || 0}
+                        </div>
+                      </td>
+                      <td className="table-td text-right">
+                        <div className="flex items-center justify-end gap-1.5 sm:gap-2">
+                          <button onClick={() => startEdit(subj)} className="btn-secondary !py-1 !px-2.5 text-xs">
+                            <Pencil size={13} /> Sửa
+                          </button>
+                          <button onClick={() => handleDelete(subj.id)} className="btn-danger !py-1 !px-2.5 text-xs">
+                            <Trash2 size={13} /> Xóa
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
   )
 }
+

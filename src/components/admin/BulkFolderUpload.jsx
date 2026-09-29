@@ -137,7 +137,7 @@ export default function BulkFolderUpload({ categories, subjects, onComplete, onC
             // Slice PDF to 15% preview
             if (file.type === 'application/pdf') {
               const arrayBuffer = await file.arrayBuffer()
-              const pdfDoc = await PDFDocument.load(arrayBuffer)
+              const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true })
               const pageCount = pdfDoc.getPageCount()
               const pagesToKeep = Math.max(1, Math.ceil(pageCount * 0.15))
 
@@ -196,59 +196,60 @@ export default function BulkFolderUpload({ categories, subjects, onComplete, onC
     : 0
 
   return (
-    <div className="bg-blue-50/70 border border-blue-200 rounded-2xl p-6 shadow-sm">
-      <div className="flex justify-between items-start mb-5">
+    <div className="bg-blue-50/70 border border-blue-200 rounded-2xl p-3.5 sm:p-6 shadow-xs">
+      <div className="flex justify-between items-start mb-4 sm:mb-5 gap-2">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xl">📁</span>
-            <h3 className="text-base font-bold text-gray-900">Tải lên hàng loạt từ Thư mục máy tính</h3>
+            <span className="text-lg sm:text-xl">📁</span>
+            <h3 className="text-sm sm:text-base font-bold text-gray-900">Tải lên hàng loạt từ Thư mục máy tính</h3>
           </div>
           <p className="text-xs text-gray-600 mt-1 max-w-2xl leading-relaxed">
             Hỗ trợ chọn thư mục lớn chứa nhiều thư mục con. Hệ thống sẽ tự động lấy tên mỗi thư mục con làm tên môn học, tự tạo môn học mới và tải các file PDF (đã tự động cắt 15% trang đầu) vào đúng môn.
           </p>
         </div>
         {onClose && !isUploading && (
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg">
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg cursor-pointer">
             <X size={20} />
           </button>
         )}
       </div>
 
       {errorMessage && (
-        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-xl mb-4">
-          <AlertCircle size={16} />
-          <span>{errorMessage}</span>
-          <button onClick={() => setErrorMessage('')} className="ml-auto"><X size={14} /></button>
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-red-600 bg-red-50 border border-red-200 px-3.5 py-2.5 rounded-xl mb-4">
+          <AlertCircle size={16} className="flex-shrink-0" />
+          <span className="flex-1">{errorMessage}</span>
+          <button onClick={() => setErrorMessage('')} className="p-1 cursor-pointer"><X size={14} /></button>
         </div>
       )}
 
       {/* Mode Selector */}
-      <div className="flex items-center gap-2 p-1 bg-white border border-blue-200 rounded-xl mb-5 w-fit">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 p-1 bg-white border border-blue-200 rounded-xl mb-4 sm:mb-5 w-full sm:w-fit">
         <button
           type="button"
           disabled={isUploading}
           onClick={() => { setMode('multi'); setPreviewGroups(null); }}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-center ${
             mode === 'multi'
-              ? 'bg-blue-600 text-white shadow-sm'
+              ? 'bg-blue-600 text-white shadow-xs'
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
-          🌟 Thư mục nhiều môn (Mỗi thư mục con = 1 môn)
+          🌟 Thư mục nhiều môn (Thư mục con = Môn)
         </button>
         <button
           type="button"
           disabled={isUploading}
           onClick={() => { setMode('single'); setPreviewGroups(null); }}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-center ${
             mode === 'single'
-              ? 'bg-blue-600 text-white shadow-sm'
+              ? 'bg-blue-600 text-white shadow-xs'
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
           📄 Thư mục của 1 môn cụ thể
         </button>
       </div>
+
 
       {/* Configuration row */}
       {!previewGroups && !completeSummary && (

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Plus, Pencil, Trash2, X, AlertCircle, Link, FileText, Eye } from 'lucide-react'
-import { getFiles, createFile, updateFile, deleteFile, getSubjects, uploadFileToStorage, getCategories, createSubject } from '../../lib/api'
+import { getFiles, createFile, updateFile, deleteFile, getSubjects, uploadFileToStorage, getCategories } from '../../lib/api'
 import { getTypeMeta, formatDate } from '../../lib/utils'
 import { PDFDocument } from 'pdf-lib'
 import { v4 as uuidv4 } from 'uuid'
@@ -124,7 +124,7 @@ export default function FilesPanel() {
         // Nếu là PDF thì tự động cắt lấy 15% trang đầu
         if (uploadFileObj.type === 'application/pdf') {
           const arrayBuffer = await uploadFileObj.arrayBuffer()
-          const pdfDoc = await PDFDocument.load(arrayBuffer)
+          const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true })
           const pageCount = pdfDoc.getPageCount()
           const pagesToKeep = Math.max(1, Math.ceil(pageCount * 0.15)) // Cắt 15%
           
@@ -208,18 +208,18 @@ export default function FilesPanel() {
   const getSubjectName = (id) => subjects.find(s => s.id === id)?.name || '—'
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Quản lý Tài liệu</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Thêm link Google Drive preview hoặc thông tin tệp vào môn học</p>
+          <h2 className="text-base sm:text-lg font-bold text-gray-900">Quản lý Tài liệu</h2>
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Thêm link Google Drive preview hoặc file tài liệu vào môn học</p>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => setShowBulk(!showBulk)} className="btn-secondary">
+        <div className="flex flex-wrap items-center gap-2">
+          <button onClick={() => setShowBulk(!showBulk)} className="btn-secondary !text-xs !py-2">
             📁 Tải lên cả thư mục
           </button>
-          <button onClick={startAdd} className="btn-primary">
-            <Plus size={16} /> Thêm tài liệu
+          <button onClick={startAdd} className="btn-primary !text-xs !py-2">
+            <Plus size={15} /> Thêm tài liệu
           </button>
         </div>
       </div>
@@ -238,37 +238,37 @@ export default function FilesPanel() {
       )}
 
       {error && (
-        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-lg">
-          <AlertCircle size={16} />
-          <span>{error}</span>
-          <button onClick={() => setError('')} className="ml-auto"><X size={14} /></button>
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-red-600 bg-red-50 border border-red-200 px-3.5 py-2.5 rounded-lg">
+          <AlertCircle size={16} className="flex-shrink-0" />
+          <span className="flex-1">{error}</span>
+          <button onClick={() => setError('')} className="p-1 cursor-pointer"><X size={14} /></button>
         </div>
       )}
 
       {/* Google Drive tip */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4 flex gap-2.5 sm:gap-3">
         <Link size={16} className="text-blue-600 flex-shrink-0 mt-0.5" />
-        <div className="text-sm text-blue-700">
+        <div className="text-xs sm:text-sm text-blue-700 leading-relaxed">
           <strong>Cách lấy link preview từ Google Drive:</strong>
           {' '}Mở file trên Drive → Chia sẻ → Sao chép link → Thay{' '}
-          <code className="bg-blue-100 px-1 rounded font-mono text-xs">/view</code> bằng{' '}
-          <code className="bg-blue-100 px-1 rounded font-mono text-xs">/preview</code>
+          <code className="bg-blue-100 px-1 py-0.5 rounded font-mono text-[11px] sm:text-xs">/view</code> bằng{' '}
+          <code className="bg-blue-100 px-1 py-0.5 rounded font-mono text-[11px] sm:text-xs">/preview</code>
           {' '}ở cuối URL.
         </div>
       </div>
 
       {/* Add/Edit Form */}
       {showForm && (
-        <div className="bg-white rounded-xl border border-blue-200 shadow-sm p-6">
-          <div className="flex items-center justify-between mb-5">
+        <div className="bg-white rounded-xl border border-blue-200 shadow-sm p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-5">
             <h3 className="text-sm font-bold text-gray-800">
               {editingId ? 'Chỉnh sửa tài liệu' : 'Thêm tài liệu mới'}
             </h3>
-            <button onClick={resetForm} className="text-gray-400 hover:text-gray-600 p-1 rounded">
+            <button onClick={resetForm} className="text-gray-400 hover:text-gray-600 p-1 rounded cursor-pointer">
               <X size={18} />
             </button>
           </div>
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">Môn học *</label>
               <select
@@ -318,10 +318,10 @@ export default function FilesPanel() {
                     }
                   }
                 }}
-                className="input-field py-1.5"
+                className="input-field py-1.5 text-xs"
                 accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
               />
-              <div className="mt-2 text-xs text-gray-400">
+              <div className="mt-1.5 text-[11px] text-gray-400">
                 Hoặc giữ nguyên link Google Drive hiện tại (nếu đang sửa tệp)
               </div>
             </div>
@@ -340,13 +340,13 @@ export default function FilesPanel() {
                   href={form.preview_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-secondary h-[42px]"
+                  className="btn-secondary h-[42px] !text-xs"
                 >
                   <Eye size={14} /> Xem thử
                 </a>
               )}
             </div>
-            <div className="md:col-span-2 flex gap-3 pt-2 border-t border-gray-100">
+            <div className="md:col-span-2 flex flex-wrap gap-2.5 pt-2 border-t border-gray-100">
               <button type="submit" disabled={saving} className="btn-primary">
                 {saving ? (
                   <span className="flex items-center gap-2">
@@ -362,12 +362,12 @@ export default function FilesPanel() {
       )}
 
       {/* Filter */}
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-gray-500">Lọc theo môn học:</span>
+      <div className="flex items-center gap-2.5">
+        <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">Lọc theo môn:</span>
         <select
           value={filterSubj}
           onChange={e => setFilterSubj(e.target.value)}
-          className="input-field w-auto max-w-xs"
+          className="input-field !py-1.5 !text-xs w-auto max-w-xs"
         >
           <option value="">Tất cả ({files.length} tệp)</option>
           {subjects.map(s => (
@@ -377,12 +377,12 @@ export default function FilesPanel() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xs">
         {selectedIds.length > 0 && (
-          <div className="bg-blue-50 px-4 py-2 border-b border-blue-100 flex items-center justify-between">
-            <span className="text-sm text-blue-800 font-medium">Đã chọn {selectedIds.length} tệp</span>
-            <button onClick={handleBulkDelete} className="btn-danger !py-1.5 text-xs flex items-center gap-1.5">
-              <Trash2 size={14} /> Xóa {selectedIds.length} tệp
+          <div className="bg-blue-50 px-3.5 py-2 border-b border-blue-100 flex items-center justify-between">
+            <span className="text-xs sm:text-sm text-blue-800 font-medium">Đã chọn {selectedIds.length} tệp</span>
+            <button onClick={handleBulkDelete} className="btn-danger !py-1 !px-2.5 text-xs flex items-center gap-1.5">
+              <Trash2 size={13} /> Xóa {selectedIds.length} tệp
             </button>
           </div>
         )}
@@ -392,82 +392,85 @@ export default function FilesPanel() {
         ) : files.length === 0 ? (
           <div className="p-8 text-center text-gray-400 text-sm">Chưa có tài liệu nào</div>
         ) : (
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="table-th w-10 text-center">
-                  <input 
-                    type="checkbox" 
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    checked={files.length > 0 && selectedIds.length === files.length} 
-                    onChange={toggleSelectAll} 
-                  />
-                </th>
-                <th className="table-th">Tên tài liệu</th>
-                <th className="table-th hidden md:table-cell">Môn học</th>
-                <th className="table-th hidden sm:table-cell">Loại</th>
-                <th className="table-th hidden lg:table-cell">Kích thước</th>
-                <th className="table-th hidden lg:table-cell">Ngày thêm</th>
-                <th className="table-th text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {files.map(file => {
-                const meta = getTypeMeta(file.type)
-                return (
-                  <tr key={file.id} className={`hover:bg-gray-50 transition-colors ${selectedIds.includes(file.id) ? 'bg-blue-50/50' : ''}`}>
-                    <td className="table-td text-center">
-                      <input 
-                        type="checkbox" 
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        checked={selectedIds.includes(file.id)} 
-                        onChange={() => toggleSelect(file.id)} 
-                      />
-                    </td>
-                    <td className="table-td">
-                      <div className="flex items-center gap-2">
-                        <FileText size={15} className={meta.text} />
-                        <span className="font-medium text-gray-800 text-sm">{file.name}</span>
-                      </div>
-                      {file.preview_url && (
-                        <a
-                          href={file.preview_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[11px] text-blue-500 hover:text-blue-700 mt-0.5 flex items-center gap-1"
-                          onClick={e => e.stopPropagation()}
-                        >
-                          <Link size={10} /> Xem preview
-                        </a>
-                      )}
-                    </td>
-                    <td className="table-td hidden md:table-cell text-xs text-gray-500">
-                      {getSubjectName(file.subject_id)}
-                    </td>
-                    <td className="table-td hidden sm:table-cell">
-                      <span className={`tag-badge ${meta.bg} ${meta.text}`}>{meta.label}</span>
-                    </td>
-                    <td className="table-td hidden lg:table-cell text-xs text-gray-400">{file.size || '—'}</td>
-                    <td className="table-td hidden lg:table-cell text-xs text-gray-400">
-                      {formatDate(file.created_at)}
-                    </td>
-                    <td className="table-td text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => startEdit(file)} className="btn-secondary !py-1.5 !px-3 text-xs">
-                          <Pencil size={13} /> Sửa
-                        </button>
-                        <button onClick={() => handleDelete(file.id)} className="btn-danger">
-                          <Trash2 size={13} /> Xóa
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-100">
+                <tr>
+                  <th className="table-th w-10 text-center">
+                    <input 
+                      type="checkbox" 
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      checked={files.length > 0 && selectedIds.length === files.length} 
+                      onChange={toggleSelectAll} 
+                    />
+                  </th>
+                  <th className="table-th whitespace-nowrap">Tên tài liệu</th>
+                  <th className="table-th hidden md:table-cell whitespace-nowrap">Môn học</th>
+                  <th className="table-th hidden sm:table-cell whitespace-nowrap">Loại</th>
+                  <th className="table-th hidden lg:table-cell whitespace-nowrap">Kích thước</th>
+                  <th className="table-th hidden lg:table-cell whitespace-nowrap">Ngày thêm</th>
+                  <th className="table-th text-right whitespace-nowrap">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {files.map(file => {
+                  const meta = getTypeMeta(file.type)
+                  return (
+                    <tr key={file.id} className={`hover:bg-gray-50 transition-colors ${selectedIds.includes(file.id) ? 'bg-blue-50/50' : ''}`}>
+                      <td className="table-td text-center w-10">
+                        <input 
+                          type="checkbox" 
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                          checked={selectedIds.includes(file.id)} 
+                          onChange={() => toggleSelect(file.id)} 
+                        />
+                      </td>
+                      <td className="table-td">
+                        <div className="flex items-center gap-2">
+                          <FileText size={15} className={`${meta.text} flex-shrink-0`} />
+                          <span className="font-semibold text-gray-800 text-sm">{file.name}</span>
+                        </div>
+                        {file.preview_url && (
+                          <a
+                            href={file.preview_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[11px] text-blue-500 hover:text-blue-700 mt-0.5 flex items-center gap-1"
+                            onClick={e => e.stopPropagation()}
+                          >
+                            <Link size={10} /> Xem preview
+                          </a>
+                        )}
+                      </td>
+                      <td className="table-td hidden md:table-cell text-xs text-gray-500 whitespace-nowrap">
+                        {getSubjectName(file.subject_id)}
+                      </td>
+                      <td className="table-td hidden sm:table-cell">
+                        <span className={`tag-badge ${meta.bg} ${meta.text}`}>{meta.label}</span>
+                      </td>
+                      <td className="table-td hidden lg:table-cell text-xs text-gray-400 whitespace-nowrap">{file.size || '—'}</td>
+                      <td className="table-td hidden lg:table-cell text-xs text-gray-400 whitespace-nowrap">
+                        {formatDate(file.created_at)}
+                      </td>
+                      <td className="table-td text-right">
+                        <div className="flex items-center justify-end gap-1.5 sm:gap-2">
+                          <button onClick={() => startEdit(file)} className="btn-secondary !py-1 !px-2.5 text-xs">
+                            <Pencil size={13} /> Sửa
+                          </button>
+                          <button onClick={() => handleDelete(file.id)} className="btn-danger !py-1 !px-2.5 text-xs">
+                            <Trash2 size={13} /> Xóa
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
   )
 }
+
